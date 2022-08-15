@@ -71,10 +71,10 @@ for game, pair in game_info.items():
 
 # %% Add discreteness and systematicity outputs
 
-discreteness_cutoff = df['hopkins_stat'].quantile(q=0.25)
+discreteness_cutoff = df['hopkins_stat'].quantile(q=0.5)
 df['discreteness'] = np.where(df['hopkins_stat'] > discreteness_cutoff, False, True)
 
-systematicity_cutoff = df['colorsignal_corr'].quantile(q=0.25)
+systematicity_cutoff = 0.5 # df['colorsignal_corr'].quantile(q=0.5)
 df['systematicity'] = np.where(df['colorsignal_corr'] > systematicity_cutoff, True, False)
 
 scaler = sklearn.preprocessing.MinMaxScaler()
