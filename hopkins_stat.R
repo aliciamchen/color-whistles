@@ -11,7 +11,7 @@ d <- read.csv(here('output/embeddings_3d.csv'))
 # Make a discreteness score for each participant 
 # Save in eitehr csv or json file 
 
-df = data.frame(matrix(ncol = 2, nrow = 0))
+df = data.frame(matrix(ncol = 3, nrow = 0))
 
 
 participants = unique(d$participant)
@@ -25,11 +25,15 @@ for (p in participants) {
     graph = TRUE,
     seed = 123
   )
-  output = c(p, res$hopkins_stat)
+  
+  participant_idx = unique(filter(d, participant == p)$participant_idx)[1]
+  # print(participant_idx)
+  output = c(participant_idx, p, res$hopkins_stat)
   df = rbind(df, output)
 }
 
-x <- c("participant", "hopkins_stat")
+x <- c("participant_idx", "participant", "hopkins_stat")
 colnames(df) <- x
 
 write.csv(df, here('output/hopkins_stat.csv'), row.names = FALSE)
+

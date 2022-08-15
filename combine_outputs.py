@@ -56,6 +56,7 @@ for game, pair in game_info.items():
     for participant in pair:
         new_row = {
             'game': game,
+            'participant_idx': int(discreteness[discreteness['participant'] == participant].iloc[0]['participant_idx']), # this is jank, change later
             'participant': participant,
             'colorsignal_corr': systematicity[participant],
             'hopkins_stat': discreteness[discreteness['participant'] == participant].iloc[0]['hopkins_stat'],
@@ -74,7 +75,7 @@ for game, pair in game_info.items():
 discreteness_cutoff = df['hopkins_stat'].quantile(q=0.5)
 df['discreteness'] = np.where(df['hopkins_stat'] > discreteness_cutoff, False, True)
 
-systematicity_cutoff = 0.5 # df['colorsignal_corr'].quantile(q=0.5)
+systematicity_cutoff = df['colorsignal_corr'].quantile(q=0.5)
 df['systematicity'] = np.where(df['colorsignal_corr'] > systematicity_cutoff, True, False)
 
 scaler = sklearn.preprocessing.MinMaxScaler()

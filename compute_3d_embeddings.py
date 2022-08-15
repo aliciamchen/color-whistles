@@ -33,6 +33,7 @@ dfs = []
 for game, participants in game_info.items():
     for participant in participants:
         this_df = df[df['participant'] == participant]
+        participant_idx = pd.unique(this_df['participant_idx'])[0]
         dists = tools.cluster.compute_DTW_distances(this_df)
 
         mds = MDS(
@@ -54,6 +55,7 @@ for game, participants in game_info.items():
 
         new_df['participant'] = participant
         new_df['game'] = game
+        new_df['participant_idx'] = participant_idx
 
         dfs.append(new_df)
     # TODO: add color info here (given limited time ok to not to do now)
