@@ -25,8 +25,7 @@ def exclude_incomplete_comm(df):
     games = pd.unique(df['gameid'])
     speakers = pd.unique(df['speakerid'])
 
-    print(f'Number of games: {len(games)}')
-    print(f'Number of speakers: {len(speakers)}')
+    print(f'Detected {len(games)} games and {len(speakers)} speakers.')
 
     # get rid of games that are fewer than 80 rounds
     for game in games:
@@ -36,6 +35,14 @@ def exclude_incomplete_comm(df):
     print(
         f"Retained {df['gameid'].nunique()} complete games, with {df['speakerid'].nunique()} total speakers.")
 
+    return df
+
+
+def exclude_incomplete_learn(learn_df, game_info):
+    player_ids_nested = list(game_info.values())
+    player_ids = [player for game in player_ids_nested for player in game]
+
+    df = learn_df[learn_df['workerid'].isin(player_ids)]
     return df
 
 
@@ -73,14 +80,6 @@ def fetch_game_info(df):
     return game_info
 
 
-def exclude_incomplete_learn(learn_df, game_info):
-    player_ids_nested = list(game_info.values())
-    player_ids = [player for game in player_ids_nested for player in game]
-
-    df = learn_df[learn_df['workerid'].isin(player_ids)]
-    return df
-
-
 if __name__ == "__main__":
 
     f_learn = "data/raw/2022-01-27_one2one/learning_data.zip"
@@ -89,13 +88,14 @@ if __name__ == "__main__":
     df_learn = pd.read_csv(f_learn)
     df_comm = pd.read_csv(f_comm)
 
+    df_learn_cleaned = exclude_incomplete_learn(df_learn, game_info)
+
     df_comm_cleaned = assign_indices(exclude_incomplete_comm(df_comm))
     game_info = fetch_game_info(df_comm_cleaned)
 
-    df_learn_cleaned = exclude_incomplete_learn(df_learn, game_info)
 
     df_comm_cleaned.to_csv("test_output/communication.zip")
-    df_learn_cleaned.to_csv("test_output/learn.zip")
+    df_learn_cleaned.to_csv("test_output/learning.zip")
 
     with open("test_output/game_info.json", "w") as f:
         json.dump(game_info, f)
