@@ -85,7 +85,8 @@ def make_init_df(init_signals_dir=params.learning_sigs_dir):
             raw_signal,
             sampling_freq=params.sampling_freq,
             referent_id=idx,
-            referent=params.learning_referents[idx]
+            referent=params.learning_referents[idx],
+            speaker='init'
         )
 
         all_signals.append(df_signal)
@@ -148,6 +149,6 @@ if __name__ == "__main__":
     df_learn_long = make_learn_df(df_learn)
     df_comm_long = make_comm_df(df_comm)
 
-    df_init.to_csv("test_output/init_signals.zip")
-    df_learn_long.to_csv("test_output/learning_signals.zip")
-    df_comm_long.to_csv("test_output/comm_signals.zip")
+    df_init.to_csv("test_output/init_signals.zip", index=False)
+    df_learn_long.to_csv("test_output/learning_signals.zip", index=False)
+    df_comm_long.to_csv("test_output/comm_signals.zip", index=False)

@@ -94,8 +94,8 @@ if __name__ == "__main__":
     game_info = fetch_game_info(df_comm_cleaned)
 
 
-    df_comm_cleaned.to_csv("test_output/communication.zip")
-    df_learn_cleaned.to_csv("test_output/learning.zip")
+    df_comm_cleaned.to_csv("test_output/communication.zip", index=False)
+    df_learn_cleaned.to_csv("test_output/learning.zip", index=False)
 
     with open("test_output/game_info.json", "w") as f:
         json.dump(game_info, f)
