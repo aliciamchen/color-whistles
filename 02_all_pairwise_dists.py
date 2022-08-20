@@ -4,20 +4,13 @@ Note: this takes >2hrs to run
 """
 # %%
 import json
-import time
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import tqdm
 from tslearn.metrics import cdist_dtw
 from tslearn.utils import to_time_series_dataset
-
-import tools
-import tools.cluster
-import tools.preprocess  # delete later
-from tools.matthias_scripts import process_whistles
 
 # %%
 df_init = pd.read_csv("test_output/init_signals.zip")
@@ -30,8 +23,9 @@ df = pd.concat([df_init, df_comm], join="inner", ignore_index=True)
 
 # DTW distances
 
-df.set_index(['speaker', 'referent'], inplace=True)
+df.set_index(['speaker', 'referent', 'referent_id'], inplace=True)
 signal_labels = df.index.unique()
+
 # %%
 print(f"{len(signal_labels)} total signals")
 
@@ -43,11 +37,11 @@ list_of_signals = [
 assert len(list_of_signals) != 0
 
 # %%
-print("Converting signals to time series dataset...")
+print("Converting signals to time series dataset")
 
 X = to_time_series_dataset(list_of_signals)
 
-print("Finding pairwise distances...")
+print("Finding pairwise distances")
 
 pairwise_dists = cdist_dtw(
     X,
@@ -59,8 +53,8 @@ pairwise_dists = cdist_dtw(
 # can you do that with json?
 
 # %% Save
-np.save("test_output/all_pairwise_dists.npy", pairwise_dists)
-np.save("test_output/all_signal_labels.npy", signal_labels)
+# np.save("test_output/all_pairwise_dists.npy", pairwise_dists)
+# np.save("test_output/all_signal_labels.npy", signal_labels)
 with open("test_output/all_signal_labels.json", "w") as f:
     json.dump(list(signal_labels), f)
 

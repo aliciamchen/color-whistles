@@ -25,7 +25,7 @@ def exclude_incomplete_comm(df):
     games = pd.unique(df['gameid'])
     speakers = pd.unique(df['speakerid'])
 
-    print(f'Detected {len(games)} games and {len(speakers)} speakers.')
+    print(f'Detected {len(games)} games and {len(speakers)} speakers')
 
     # get rid of games that are fewer than 80 rounds
     for game in games:
@@ -33,7 +33,7 @@ def exclude_incomplete_comm(df):
             df.drop(df[df['gameid'] == game].index, inplace=True)
 
     print(
-        f"Retained {df['gameid'].nunique()} complete games, with {df['speakerid'].nunique()} total speakers.")
+        f"Retained {df['gameid'].nunique()} complete games, with {df['speakerid'].nunique()} total speakers")
 
     return df
 
@@ -87,11 +87,11 @@ if __name__ == "__main__":
 
     df_learn = pd.read_csv(f_learn)
     df_comm = pd.read_csv(f_comm)
+    game_info = fetch_game_info(df_comm)
 
     df_learn_cleaned = exclude_incomplete_learn(df_learn, game_info)
 
     df_comm_cleaned = assign_indices(exclude_incomplete_comm(df_comm))
-    game_info = fetch_game_info(df_comm_cleaned)
 
 
     df_comm_cleaned.to_csv("test_output/communication.zip", index=False)

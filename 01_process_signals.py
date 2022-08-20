@@ -84,7 +84,7 @@ def make_init_df(init_signals_dir=params.learning_sigs_dir):
         df_signal = preprocess.make_signal_df(
             raw_signal,
             sampling_freq=params.sampling_freq,
-            referent_id=idx,
+            referent_id=params.init_idx_color_mappings[idx],
             referent=params.learning_referents[idx],
             speaker='init'
         )
