@@ -7,19 +7,15 @@ pairwise.dists <- as.matrix(read_table(here("test_output/pairwise_dists.txt"), c
 signal.labels <- read_json(here("test_output/all_signal_labels.json"), simplifyVector = TRUE)
 wcs <- read_json(here("tools/wcs_row_F.json"))
 
-
-participant.ids <- unique(signal.labels[, 1])
-
-# Loop through participants
-# Make distance matrix for signals
-# Make distance matrix for colors
-# calculate systematicities
-
 euclidean <- function(a, b) sqrt(sum((a - b)^2))
+
+speaker.ids <- unique(signal.labels[, 1])
+
 
 systs <- matrix(ncol = 2, nrow = 0)
 
-for (id in participant.ids) {
+# For each participant, extract their signal distances from big pairwise matrix
+for (id in speaker.ids) {
   
   signal.indices <- which(signal.labels %in% id) 
   n.signals <- length((signal.indices))
@@ -45,6 +41,8 @@ for (id in participant.ids) {
   systematicity <- dcor(signal.dists, color.dists)
   systs <- rbind(systs, c(id, systematicity))
 }
+
+colnames(systs) <- c('speaker', 'dcor')
 
 write.csv(systs, here('test_output/systematicity.csv'), row.names = FALSE)
 
