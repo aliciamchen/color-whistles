@@ -10,17 +10,17 @@ seed = 88
 learning_sigs_dir = "data/learning_signals"
 
 mds_discreteness = {
-    'n_components': 4,
-    'eps': 1e-6,
-    'n_init': 6,
-    'max_iter': 500
+    'n_components': 3,
+    'eps': 1e-9,
+    'n_init': 40,
+    'max_iter': 5000
 }
 
 mds_viz = {
     'n_components': 2,
-    'eps': 1e-6,
-    'n_init': 6,
-    'max_iter': 500
+    'eps': 1e-9,
+    'n_init': 40,
+    'max_iter': 5000
 }
 
 learning_referents = ["#d9445d", "#ae6c00", "#009069", "#008b98", "#8c6db5"]
@@ -32,4 +32,10 @@ init_idx_color_mappings = {
     2: 18,
     3: 23,
     4: 32,
+}
+
+# gaussian mixture
+bgm = {
+    'n_components': 20,
+    'max_iter': 1000
 }
