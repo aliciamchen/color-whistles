@@ -123,6 +123,7 @@ def make_learn_df(df):
             referent=params.learning_referents[row.referent_id],
             referent_id=row.referent_id,
             signal_id=row.signal_id,
+            block_id=row.block_id,
             n_correct_lc_guesses=row.num_correc_lc_guesses,
             lc_reached=row.learning_criterion_reached,
             trial_index=row.trial_index,
