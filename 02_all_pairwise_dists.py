@@ -16,14 +16,14 @@ from tslearn.utils import to_time_series_dataset
 df_init = pd.read_csv("test_output/init_signals.zip")
 df_comm = pd.read_csv("test_output/comm_signals.zip")
 
-df = pd.concat([df_init, df_comm], join="inner", ignore_index=True)
+df = pd.concat([df_init, df_comm], ignore_index=True)
 
 
 # %%
 
 # DTW distances
 
-df.set_index(['speaker', 'referent', 'referent_id'], inplace=True)
+df.set_index(['game', 'speaker', 'referent', 'referent_id'], inplace=True)
 signal_labels = df.index.unique()
 
 # %%

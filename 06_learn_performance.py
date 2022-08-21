@@ -3,10 +3,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 import json
-import tools.preprocess
-from scipy import stats
 import tslearn.metrics
 import params
 from tslearn.utils import to_time_series_dataset

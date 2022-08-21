@@ -2,7 +2,6 @@ library(here)
 library(tidyverse)
 library(factoextra)
 library(clustertend)
-library(ggthemes)
 
 
 d <- read.csv(here('test_output/embedding_disc.csv'))

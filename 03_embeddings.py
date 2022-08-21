@@ -30,7 +30,7 @@ assert pairwise_dists.shape[0] == len(signal_labels)
 
 # %% Calculate embedding
 
-
+# multiple dimensions, for calculating discreteness (and clustering)
 mds_discreteness = MDS(
     n_components=params.mds_discreteness['n_components'],
     eps=params.mds_discreteness['eps'],
@@ -42,6 +42,7 @@ mds_discreteness = MDS(
     max_iter=params.mds_discreteness['max_iter']
 )
 
+# 2d for visualization
 mds_viz = MDS(
     n_components=params.mds_viz['n_components'],
     eps=params.mds_viz['eps'],
@@ -57,23 +58,27 @@ mds_viz = MDS(
 # %%
 
 embedding_disc = mds_discreteness.fit_transform(pairwise_dists)
+
+# %%
 embedding_viz = mds_viz.fit_transform(pairwise_dists)
 
 # %%
 
 df_embedding_disc = pd.DataFrame(
     data=np.concatenate((signal_labels, embedding_disc), axis=1),
-    columns=['speaker', 'referent'] + [f"mds_{i + 1}" for i in range(params.mds_discreteness['n_components'])]
+    columns=['game', 'speaker', 'referent', 'referent_id'] + [f"mds_{i + 1}" for i in range(params.mds_discreteness['n_components'])]
 )
 
 # %%
 
 df_embedding_viz = pd.DataFrame(
     data=np.concatenate((signal_labels, embedding_viz), axis=1),
-    columns=['speaker', 'referent'] + [f"mds_{i + 1}" for i in range(params.mds_viz['n_components'])]
+    columns=['game', 'speaker', 'referent', 'referent_id'] + [f"mds_{i + 1}" for i in range(params.mds_viz['n_components'])]
 )
 
 # %%
 
 df_embedding_disc.to_csv('test_output/embedding_disc.csv', index=False)
 df_embedding_viz.to_csv('test_output/embedding_viz.csv', index=False)
+
+# %%

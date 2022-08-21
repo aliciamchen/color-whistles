@@ -87,12 +87,12 @@ if __name__ == "__main__":
 
     df_learn = pd.read_csv(f_learn)
     df_comm = pd.read_csv(f_comm)
-    game_info = fetch_game_info(df_comm)
 
-    df_learn_cleaned = exclude_incomplete_learn(df_learn, game_info)
 
     df_comm_cleaned = assign_indices(exclude_incomplete_comm(df_comm))
 
+    game_info = fetch_game_info(df_comm_cleaned)
+    df_learn_cleaned = exclude_incomplete_learn(df_learn, game_info)
 
     df_comm_cleaned.to_csv("test_output/communication.zip", index=False)
     df_learn_cleaned.to_csv("test_output/learning.zip", index=False)

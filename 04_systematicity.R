@@ -9,7 +9,7 @@ wcs <- read_json(here("tools/wcs_row_F.json"))
 
 euclidean <- function(a, b) sqrt(sum((a - b)^2))
 
-speaker.ids <- unique(signal.labels[, 1])
+speaker.ids <- unique(signal.labels[, 2])
 
 
 systs <- matrix(ncol = 2, nrow = 0)
