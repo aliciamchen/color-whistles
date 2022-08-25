@@ -9,17 +9,17 @@ library(readr)
 
 theme_set(theme_few(base_size = 15))
 
-d <- read.csv(here('test_output/one2one_sys_disc_agg.csv')) %>%
+d <- read.csv(here('test/one2many_sys_disc_agg.csv')) %>%
   mutate(paired_comm_score = (own_score + comm_score) / 2)
 
-d.comm <- read_csv(here('test_output/communication.zip'))
+d.comm <- read_csv(here("test/one2many_comm.zip"))
 
 
 # relationship between learning and communication score
 ggplot(d, aes(x = learn_score, y = comm_score)) +
   geom_point() +
   geom_smooth(method = 'lm') + 
-  labs(title = "one to one initialization")
+  labs(title = "one to many condition")
 
 mod <- lm(comm_score ~ 1 + learn_score,
           data = d)
@@ -32,8 +32,8 @@ d.with.resid <- cbind(na.omit(d), learn_comm_resid)
 
 # relationship between communication round and communication score
 ggplot(d.comm, aes(x = round, y = score)) +
-  geom_smooth() +
-  labs(title = "one to one initialization")
+  geom_smooth()  + 
+  labs(title = "one to many condition")
 
 comm.score.mod <- gam(score ~ s(round, bs = "cs"),
                       data = d.comm)
@@ -51,7 +51,7 @@ summary(comm.score.mod.linear)
 # relationship between discreteness and systematicity
 ggplot(d, aes(x = systematicity, y = discreteness, col = comm_score)) +
   geom_point(size = 2.5) + 
-  labs(title = "one to one initialization")
+  labs(title = "one to many initialization")
 
 disc.sys.mod <- lm(discreteness ~ 1 + systematicity,
                    data = d)

@@ -22,7 +22,7 @@ with open(f2, 'r') as f:
 with open(f3, 'r') as f:
     game_scores = json.load(f)
 
-systematicity = pd.read_csv(f4, index_col="V1")
+systematicity = pd.read_csv(f4, index_col="speaker")
 discreteness = pd.read_csv(f5, index_col="speaker")
 
 def populate_learn_score(participant):
@@ -40,7 +40,7 @@ for game, pair in game_info.items():
             'game': game,
             # 'participant_idx': #int(discreteness[discreteness['participant'] == participant].iloc[0]['participant_idx']), # this is jank, change later
             'speaker': participant,
-            'systematicity': systematicity.at[participant, "V2"],
+            'systematicity': systematicity.at[participant, "dcor"],
             'discreteness': discreteness.at[participant, "hopkins_stat"],#discreteness[discreteness['participant'] == participant].iloc[0]['hopkins_stat'],
             'learn_score': populate_learn_score(participant),#learn_scores[participant],
             'own_score': game_scores[participant],
@@ -53,14 +53,14 @@ for game, pair in game_info.items():
 
 # %% Normalize
 
-scaler = MinMaxScaler()
+# scaler = MinMaxScaler()
 
-df['discreteness'] = scaler.fit_transform(df[['discreteness']].to_numpy())
-df['systematicity'] = scaler.fit_transform(df[['systematicity']].to_numpy())
-df['learn_score'] = 1 - scaler.fit_transform(df[['learn_score']].to_numpy())
-df['own_score'] = scaler.fit_transform(df[['own_score']].to_numpy())
-df['comm_score'] = scaler.fit_transform(df[['comm_score']].to_numpy())
-
-df.to_csv(os.path.join(output_dir, "sys_disc_agg.csv"), index=False)
+# df['discreteness'] = scaler.fit_transform(df[['discreteness']].to_numpy())
+# df['systematicity'] = scaler.fit_transform(df[['systematicity']].to_numpy())
+# df['learn_score'] = 1 - scaler.fit_transform(df[['learn_score']].to_numpy())
+# df['own_score'] = scaler.fit_transform(df[['own_score']].to_numpy())
+# df['comm_score'] = scaler.fit_transform(df[['comm_score']].to_numpy())
+df['learn_score'] = -1 * df['learn_score'] + df['learn_score'].max()
+df.to_csv(os.path.join(output_dir, "one2one_sys_disc_agg.csv"), index=False)
 
 # %%

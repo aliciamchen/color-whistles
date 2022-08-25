@@ -8,7 +8,7 @@ from sklearn.mixture import BayesianGaussianMixture
 import params
 
 
-df = pd.read_csv("test_output/embedding_viz.csv")
+df = pd.read_csv("test/one2many_embedding_viz.csv")
 # %%
 
 bgm = BayesianGaussianMixture(
@@ -23,7 +23,7 @@ for speaker in pd.unique(df["speaker"]):
     cluster_labels = bgm.fit_predict(df[df["speaker"] == speaker][["mds_1", "mds_2"]])
     df.loc[df["speaker"] == speaker, "cluster_label"] = cluster_labels
 
-df.to_csv("test_output/embedding_viz.csv", index=False)
+df.to_csv("test/one2many_embedding_viz.csv", index=False)
 
 # If discreteness threshold is below a certain value, don't cluster
 # %%

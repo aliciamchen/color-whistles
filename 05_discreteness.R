@@ -4,7 +4,7 @@ library(factoextra)
 library(clustertend)
 
 
-d <- read.csv(here('test_output/embedding_disc.csv'))
+d <- read.csv(here('test/one2many_embedding_disc.csv'))
 
 speaker.ids = unique(d$speaker)
 
@@ -28,5 +28,5 @@ for (id in speaker.ids) {
 
 colnames(df) <- c("speaker", "hopkins_stat")
 
-write.csv(df, here('test_output/discreteness.csv'), row.names = FALSE)
+write.csv(df, here('test/one2many_discreteness.csv'), row.names = FALSE)
 

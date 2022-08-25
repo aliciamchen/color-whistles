@@ -5,7 +5,7 @@ library(ggthemes)
 
 theme_set(theme_few(base_size = 15))
 d <- read.csv(here("test_output/embedding_viz.csv"))
-d.metrics <- read.csv((here("test_output/sys_disc_agg.csv")))
+d.metrics <- read.csv((here("test_output/one2one_sys_disc_agg.csv")))
 
 
 # Make color mapping vector

@@ -30,14 +30,14 @@ learning_referents = {
 # learning_referents = ["#d9445d", "#ae6c00", "#009069", "#008b98", "#8c6db5"]
 
 # referent ids in raw learning df mapped onto 0-39 referent ids
-init_idx_color_mappings = {
+init_color_mappings = {
     "one2one": {0: 0, 1: 6, 2: 18, 3: 23, 4: 32},
     "one2many": {0: 4, 1: 7, 2: 8, 3: 16, 4: 24, 5: 28, 6: 30, 7: 31, 8: 36}
 }
 
 # init signal mappings with {referent_id: signal_id}
 init_signal_mappings = {
-    "one2one": {0: 0, 1: 1, 2: 2, 3: 3, 4: 4},
+    "one2one": {0: 0, 6: 1, 18: 2, 23: 3, 32: 4},
     "one2many": {4: 1, 7: 2, 8: 2, 16: 1, 24: 0, 28: 0, 30: 2, 31: 1, 36: 0}
 }
 
