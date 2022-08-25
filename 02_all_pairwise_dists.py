@@ -2,63 +2,77 @@
 Calculate pairwise distances between all signals (including input) for MDS projection
 Note: this takes >2hrs to run
 """
-# %%
+import argparse
 import json
+import os
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import tqdm
 from tslearn.metrics import cdist_dtw
 from tslearn.utils import to_time_series_dataset
 
-# %%
-df_init = pd.read_csv("test_output/init_signals.zip")
-df_comm = pd.read_csv("test_output/comm_signals.zip")
 
-df = pd.concat([df_init, df_comm], ignore_index=True)
+def main(args):
 
+    print(f"Calculating pairwise distances for {args.expt_tag}")
 
-# %%
+    df_init = pd.read_csv(args.init_signals)
+    df_comm = pd.read_csv(args.comm_signals)
 
-# DTW distances
+    df = pd.concat([df_init, df_comm], ignore_index=True)
+    df.set_index(["game", "speaker", "referent", "referent_id"], inplace=True)
 
-df.set_index(["game", "speaker", "referent", "referent_id"], inplace=True)
-signal_labels = df.index.unique()
+    signal_labels = df.index.unique()
 
-# %%
-print(f"{len(signal_labels)} total signals")
+    print(f"{len(signal_labels)} total signals")
+    print("Transferring signals into a big list")
 
-print("Transferring signals into a big list")
-list_of_signals = [
-    df[df.index == idx]["signalWithZeros"].to_list() for idx in tqdm.tqdm(signal_labels)
-]
+    list_of_signals = [
+        df[df.index == idx]["signalWithZeros"].to_list()
+        for idx in tqdm.tqdm(signal_labels)
+    ]
 
-assert len(list_of_signals) != 0
+    assert len(list_of_signals) != 0
 
-# %%
-print("Converting signals to time series dataset")
+    print("Converting signals to time series dataset")
+    X = to_time_series_dataset(list_of_signals)
 
-X = to_time_series_dataset(list_of_signals)
+    print("Finding pairwise distances")
+    pairwise_dists = cdist_dtw(X, n_jobs=-1, verbose=1)
 
-print("Finding pairwise distances")
+    with open(
+        os.path.join(args.output_dir, f"{args.expt_tag}_signal_labels.json"), "w"
+    ) as f:
+        json.dump(list(signal_labels), f)
 
-pairwise_dists = cdist_dtw(X, n_jobs=-1, verbose=1)
-# TODO: find a good way to save unique indices
-# maybe for this it's good to save it as a list of lists
-# can you do that with json?
-
-# %% Save
-# np.save("test_output/all_pairwise_dists.npy", pairwise_dists)
-# np.save("test_output/all_signal_labels.npy", signal_labels)
-with open("test_output/all_signal_labels.json", "w") as f:
-    json.dump(list(signal_labels), f)
-
-np.savetxt(
-    "test_output/pairwise_dists.txt",
-    pairwise_dists,
-    comments="Pairwise signal similarities, including learning signals (see `all_signal_labels.json` for labels)",
-)
+    np.savetxt(
+        os.path.join(args.output_dir, f"{args.expt_tag}_pairwise_dists.txt"),
+        pairwise_dists,
+        comments="Pairwise signal similarities, including learning signals (see `all_signal_labels.json` for labels)",
+    )
 
 
-# %%
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--expt_tag",
+        required=True,
+        type=str,
+        help="which experiment? for labeling files",
+    )
+    parser.add_argument(
+        "--init_signals", required=True, type=str, help="csv of init signals"
+    )
+    parser.add_argument(
+        "--comm_signals", required=True, type=str, help="csv of comm signals"
+    )
+    parser.add_argument(
+        "--output_dir", required=True, type=str, help="place to save output"
+    )
+
+    args = parser.parse_args()
+
+    main(args)
+

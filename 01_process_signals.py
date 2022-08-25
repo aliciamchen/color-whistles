@@ -97,6 +97,7 @@ def make_init_df(initialization, init_signals_dir=params.learning_sigs_dir):
         df_signal = preprocess.make_signal_df(
             signals[signal_id],
             sampling_freq=params.sampling_freq,
+            signal_id=signal_id,
             referent_id=referent_id,
             referent=params.learning_referents[initialization][
                 key_by_value(params.init_color_mappings[initialization], referent_id)

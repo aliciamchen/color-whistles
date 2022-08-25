@@ -90,9 +90,6 @@ def main(args):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
-    # f_learn = "data/raw/2022-01-27_one2one/learning_data.zip"
-    # f_comm = "data/raw/2022-01-27_one2one/communication_game_data.zip"
-
     df_learn = pd.read_csv(f_learn)
     df_comm = pd.read_csv(f_comm)
 
