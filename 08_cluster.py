@@ -8,22 +8,22 @@ from sklearn.mixture import BayesianGaussianMixture
 import params
 
 
-df = pd.read_csv("test_output/embedding_disc.csv")
+df = pd.read_csv("test_output/embedding_viz.csv")
 # %%
 
 bgm = BayesianGaussianMixture(
-    n_components=params.bgm['n_components'],
-    max_iter=params.bgm['max_iter'],
-    random_state=params.seed
+    n_components=params.bgm["n_components"],
+    max_iter=params.bgm["max_iter"],
+    random_state=params.seed,
 )
 
-for speaker in pd.unique(df['speaker']):
-    if speaker == 'init':
+for speaker in pd.unique(df["speaker"]):
+    if speaker == "init":
         continue
-    cluster_labels = bgm.fit_predict(df[df['speaker'] == speaker][['mds_1', 'mds_2', 'mds_3', 'mds_4']])
-    df.loc[df['speaker'] == speaker, 'cluster_label'] = cluster_labels
+    cluster_labels = bgm.fit_predict(df[df["speaker"] == speaker][["mds_1", "mds_2"]])
+    df.loc[df["speaker"] == speaker, "cluster_label"] = cluster_labels
 
-df.to_csv("test_output/cluster_labels.csv", index=False)
+df.to_csv("test_output/embedding_viz.csv", index=False)
 
 # If discreteness threshold is below a certain value, don't cluster
 # %%

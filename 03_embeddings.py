@@ -18,11 +18,12 @@ from sklearn.manifold import MDS
 import params
 import json
 import time
+
 # %%
 
 pairwise_dists = np.loadtxt("test_output/pairwise_dists.txt")
 
-with open("test_output/all_signal_labels.json", 'r') as f:
+with open("test_output/all_signal_labels.json", "r") as f:
     signal_labels = json.load(f)
 
 assert pairwise_dists.shape[0] == len(signal_labels)
@@ -32,26 +33,26 @@ assert pairwise_dists.shape[0] == len(signal_labels)
 
 # multiple dimensions, for calculating discreteness (and clustering)
 mds_discreteness = MDS(
-    n_components=params.mds_discreteness['n_components'],
-    eps=params.mds_discreteness['eps'],
+    n_components=params.mds_discreteness["n_components"],
+    eps=params.mds_discreteness["eps"],
     n_jobs=-1,
     verbose=7,
     dissimilarity="precomputed",
     random_state=params.seed,
-    n_init=params.mds_discreteness['n_init'],
-    max_iter=params.mds_discreteness['max_iter']
+    n_init=params.mds_discreteness["n_init"],
+    max_iter=params.mds_discreteness["max_iter"],
 )
 
 # 2d for visualization
 mds_viz = MDS(
-    n_components=params.mds_viz['n_components'],
-    eps=params.mds_viz['eps'],
+    n_components=params.mds_viz["n_components"],
+    eps=params.mds_viz["eps"],
     n_jobs=-1,
     verbose=7,
     dissimilarity="precomputed",
     random_state=params.seed,
-    n_init=params.mds_viz['n_init'],
-    max_iter=params.mds_viz['max_iter']
+    n_init=params.mds_viz["n_init"],
+    max_iter=params.mds_viz["max_iter"],
 )
 
 
@@ -66,19 +67,21 @@ embedding_viz = mds_viz.fit_transform(pairwise_dists)
 
 df_embedding_disc = pd.DataFrame(
     data=np.concatenate((signal_labels, embedding_disc), axis=1),
-    columns=['game', 'speaker', 'referent', 'referent_id'] + [f"mds_{i + 1}" for i in range(params.mds_discreteness['n_components'])]
+    columns=["game", "speaker", "referent", "referent_id"]
+    + [f"mds_{i + 1}" for i in range(params.mds_discreteness["n_components"])],
 )
 
 # %%
 
 df_embedding_viz = pd.DataFrame(
     data=np.concatenate((signal_labels, embedding_viz), axis=1),
-    columns=['game', 'speaker', 'referent', 'referent_id'] + [f"mds_{i + 1}" for i in range(params.mds_viz['n_components'])]
+    columns=["game", "speaker", "referent", "referent_id"]
+    + [f"mds_{i + 1}" for i in range(params.mds_viz["n_components"])],
 )
 
 # %%
 
-df_embedding_disc.to_csv('test_output/embedding_disc.csv', index=False)
-df_embedding_viz.to_csv('test_output/embedding_viz.csv', index=False)
+df_embedding_disc.to_csv("test_output/embedding_disc.csv", index=False)
+df_embedding_viz.to_csv("test_output/embedding_viz.csv", index=False)
 
 # %%

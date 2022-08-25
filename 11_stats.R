@@ -31,8 +31,7 @@ d.with.resid <- cbind(na.omit(d), learn_comm_resid)
 
 # relationship between communication round and communication score
 ggplot(d.comm, aes(x = round, y = score)) +
-  geom_smooth() +
-  labs(title = "smoothed using GAM")
+  geom_smooth() 
 
 comm.score.mod <- gam(score ~ s(round, bs = "cs"),
                       data = d.comm)
@@ -49,7 +48,7 @@ summary(comm.score.mod.linear)
 
 # relationship between discreteness and systematicity
 ggplot(d, aes(x = systematicity, y = discreteness, col = comm_score)) +
-  geom_point()
+  geom_point(size = 2.5)
 
 disc.sys.mod <- lm(discreteness ~ 1 + systematicity,
                    data = d)
@@ -71,20 +70,24 @@ summary(perf.mod.paired)
 
 # break down plots into individual systematicity and discreteness vs. performance
 ggplot(d, aes(x = systematicity, y = comm_score, col = game)) +
-  geom_point() +
-  theme(legend.position = "none")
+  geom_point(size = 2.5) +
+  theme(legend.position = "none") + 
+  labs(title = "Systematicity and performance, colored by game")
 
 ggplot(d, aes(x = discreteness, y = comm_score, col = game)) +
-  geom_point() +
-  theme(legend.position = "none")
+  geom_point(size = 2.5) +
+  theme(legend.position = "none") + 
+  labs(title = "Discreteness and performance, colored by game")
 
 # look at histograms of systematicity and discreteness
 
 ggplot(d, aes(x = systematicity)) +
-  geom_histogram()
+  geom_histogram(bins = 10) + 
+  theme(legend.position = "none")
 
 ggplot(d, aes(x = discreteness)) +
-  geom_histogram()
+  geom_histogram(bins = 10) + 
+  theme(legend.position = "none")
 
 # add in residuals to linear model
 perf.mod.resid <- lm(comm_score ~ 1 + discreteness * systematicity + learn_comm_resid,
@@ -94,18 +97,18 @@ summary(perf.mod.resid)
 
 # plot residuals vs. performance
 ggplot(d.with.resid, aes(x = learn_comm_resid, y = comm_score, col = game)) +
-  geom_point() +
-  theme(legend.position = "none")
-# labs(title = "Each color is a game")
+  geom_point(size = 2.5) +
+  theme(legend.position = "none") + 
+  labs(title = "Residuals and performance, colored by game")
 
 # does this mean htat participants who do better incommunication vs. learning communicate better?
 
 ggplot(d.with.resid,
        aes(x = learn_comm_resid, y = systematicity, col = game)) +
-  geom_point() +
+  geom_point(size = 2.5) +
   theme(legend.position = "none")
 
 ggplot(d.with.resid,
        aes(x = learn_comm_resid, y = discreteness, col = game)) +
-  geom_point() +
+  geom_point(size = 2.5) +
   theme(legend.position = "none")

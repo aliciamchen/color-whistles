@@ -23,7 +23,7 @@ df = pd.concat([df_init, df_comm], ignore_index=True)
 
 # DTW distances
 
-df.set_index(['game', 'speaker', 'referent', 'referent_id'], inplace=True)
+df.set_index(["game", "speaker", "referent", "referent_id"], inplace=True)
 signal_labels = df.index.unique()
 
 # %%
@@ -43,11 +43,7 @@ X = to_time_series_dataset(list_of_signals)
 
 print("Finding pairwise distances")
 
-pairwise_dists = cdist_dtw(
-    X,
-    n_jobs=-1,
-    verbose=1
-)
+pairwise_dists = cdist_dtw(X, n_jobs=-1, verbose=1)
 # TODO: find a good way to save unique indices
 # maybe for this it's good to save it as a list of lists
 # can you do that with json?
@@ -61,9 +57,8 @@ with open("test_output/all_signal_labels.json", "w") as f:
 np.savetxt(
     "test_output/pairwise_dists.txt",
     pairwise_dists,
-    comments="Pairwise signal similarities, including learning signals (see `all_signal_labels.json` for labels)"
+    comments="Pairwise signal similarities, including learning signals (see `all_signal_labels.json` for labels)",
 )
-
 
 
 # %%

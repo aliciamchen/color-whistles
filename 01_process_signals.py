@@ -15,8 +15,11 @@ from tools.matthias_scripts import process_whistles
 
 
 def fetch_json_signal(df, speaker, referent):
-    raw_signal = json.loads(df.loc[(df['speakerid'] == speaker) & (
-        df['correctid'] == referent)]['signalproduced'].item())
+    raw_signal = json.loads(
+        df.loc[(df["speakerid"] == speaker) & (df["correctid"] == referent)][
+            "signalproduced"
+        ].item()
+    )
     return raw_signal
 
 
@@ -51,7 +54,7 @@ def make_comm_df(df):
             listener=row.listenerid,
             speaker=row.speakerid,
             speaker_idx=row.speaker_idx,
-            game=row.gameid
+            game=row.gameid,
         )
 
         all_signals.append(df_signal)
@@ -61,10 +64,11 @@ def make_comm_df(df):
     return big_df
 
 
-def make_init_df(init_signals_dir=params.learning_sigs_dir):
+def make_init_df(initialization, init_signals_dir=params.learning_sigs_dir):
     """Make dataframe of initialization signals
 
     Args:
+        initialization (str)
         init_signals_dir (str, optional): folder to find `.json` file of learning phase signals.
         Defaults to params.learning_sigs_dir.
 
@@ -74,19 +78,20 @@ def make_init_df(init_signals_dir=params.learning_sigs_dir):
     print("Processing initialization signals...")
 
     signals = preprocess.load_signals_from_folder(
-        init_signals_dir)  # load from `learning_signals.json`
+        init_signals_dir
+    )  # load from `learning_signals.json`
 
     all_signals = []
 
     # because all the signals start in one `.json` file, index using filename
-    for idx, raw_signal in enumerate(signals['learning_signals']):
+    for idx, raw_signal in enumerate(signals["learning_signals"]):
 
         df_signal = preprocess.make_signal_df(
             raw_signal,
             sampling_freq=params.sampling_freq,
             referent_id=params.init_idx_color_mappings[idx],
             referent=params.learning_referents[idx],
-            speaker='init'
+            speaker="init",
         )
 
         all_signals.append(df_signal)
@@ -107,7 +112,7 @@ def make_learn_df(df):
         signal_string = row.signal
 
         # somehow `json.loads` doesn't work for these signals, we have to fix some stuff
-        signal_string = signal_string.replace("\'", "\"")
+        signal_string = signal_string.replace("'", '"')
         signal_string = signal_string.replace(" ", "")
 
         raw_signal = eval(signal_string)
@@ -128,7 +133,7 @@ def make_learn_df(df):
             lc_reached=row.learning_criterion_reached,
             trial_index=row.trial_index,
             trial_type=row.trial_type,
-            speaker=row.workerid
+            speaker=row.workerid,
         )
 
         all_signals.append(df_signal)

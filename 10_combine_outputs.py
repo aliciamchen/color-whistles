@@ -57,7 +57,7 @@ scaler = MinMaxScaler()
 
 df['discreteness'] = scaler.fit_transform(df[['discreteness']].to_numpy())
 df['systematicity'] = scaler.fit_transform(df[['systematicity']].to_numpy())
-df['learn_score'] = scaler.fit_transform(df[['learn_score']].to_numpy())
+df['learn_score'] = 1 - scaler.fit_transform(df[['learn_score']].to_numpy())
 df['own_score'] = scaler.fit_transform(df[['own_score']].to_numpy())
 df['comm_score'] = scaler.fit_transform(df[['comm_score']].to_numpy())
 
