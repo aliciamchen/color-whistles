@@ -9,6 +9,7 @@ wcs <- read_json(here("tools/wcs_row_F.json"))
 
 euclidean <- function(a, b) sqrt(sum((a - b)^2))
 
+# TODO: filter for speaker ids in init
 speaker.ids <- unique(signal.labels[, 2])
 
 
@@ -16,27 +17,27 @@ systs <- matrix(ncol = 2, nrow = 0)
 
 # For each participant, extract their signal distances from big pairwise matrix
 for (id in speaker.ids) {
-  
-  signal.indices <- which(signal.labels %in% id) 
+
+  signal.indices <- which(signal.labels %in% id)
   n.signals <- length((signal.indices))
-  
+
   signal.dists <- matrix(NA, nrow = n.signals, ncol = n.signals)
   color.dists <- matrix(NA, nrow = n.signals, ncol = n.signals)
-  
+
   for (i in 1:n.signals) {
     for (j in 1:n.signals) {
       signal.dist <- pairwise.dists[signal.indices[i], signal.indices[j]]
-      
+
       color.idx.i <- strtoi(signal.labels[signal.indices[i], 3]) + 1 # correct for zero-indexing
       color.idx.j <- strtoi(signal.labels[signal.indices[j], 3]) + 1
-      
+
       color.dist = euclidean(unlist(wcs$luv[[color.idx.i]]), unlist(wcs$luv[[color.idx.j]]))
-      
+
       signal.dists[i, j] <- signal.dist
       color.dists[i, j] <- color.dist
     }
   }
-  
+
   # Calculate distance correlation
   systematicity <- dcor(signal.dists, color.dists)
   systs <- rbind(systs, c(id, systematicity))
