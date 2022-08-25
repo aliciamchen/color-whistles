@@ -1,9 +1,9 @@
 .DS_Store
 .vscode
 .ipynb_checkpoints
-data
 __pycache__
 figs.ipynb
 .ipynb
 .Rproj.user
 test_output
+data_old
