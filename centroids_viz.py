@@ -5,6 +5,9 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from tools import viz
+import matplotlib.pyplot as plt
+import seaborn as sns
+from skimage.color import luv2rgb
 
 # load in LUV files from json
 #  `embedding_viz.csv` has the clusters
@@ -15,9 +18,48 @@ from tools import viz
 # then plot! from `tools.viz`
 # probably add participant ids to this plot too
 
+def plot_ref_colors(cmap, title=None, save=False, output_dir="./results/colors.png"):
+    """View colors on a horizontal grid; every color is labeled with its index
+
+    Args:
+        cmap (list): list of RGB coords
+        save (bool, optional): Whether to save the output `.png` file. Defaults to False.
+        output_dir (str, optional): Place to save the plot. Defaults to "./results/colors.png".
+    """
+    nColors = len(cmap)
+
+    plt.figure(figsize=(2*nColors, 2))
+
+    sns.heatmap(
+        data=np.array([list(range(nColors))]),
+        cmap=cmap,
+        annot=np.array([list(range(nColors))]),
+        annot_kws={"size": 20},
+        linewidths=0.1,
+        cbar=False,
+        xticklabels=False,
+        yticklabels=False,
+    )
+
+    plt.title(title, fontsize=50)
+    if save:
+        plt.savefig(output_dir)
+
+    if not save:
+        plt.show()
+
+
+def plot_luv_colors(luv, title=None, **kwargs):
+    if type(luv) is not list:
+        luv = np.array(luv)
+
+    rgb_array = luv2rgb(luv)
+    rgb_cmap = rgb_array.tolist()
+    plot_ref_colors(cmap=rgb_cmap, title=title, **kwargs)
+
 # %%
 
-df = pd.read_csv("test_output/embedding_viz.csv")
+df = pd.read_csv("test/one2many_embedding_viz.csv")
 df['centroid'] = np.nan
 df['centroid'] = df['centroid'].astype(object)
 
@@ -67,5 +109,6 @@ for speaker in pd.unique(df['speaker']):
 for speaker in pd.unique(df['speaker']):
     if speaker == 'init':
         continue
-    viz.plot_luv_colors(speaker_centroid_maps[speaker])
+    plot_luv_colors(speaker_centroid_maps[speaker], title=speaker)
 # %%
+# TODO: plot all centroid maps in one file
