@@ -15,9 +15,7 @@ wcs <- read_json(here("tools/wcs_row_F.json"))
 euclidean <- function(a, b)
   sqrt(sum((a - b) ^ 2))
 
-# TODO: filter for speaker ids in init
 speaker.ids <- unique(signal.labels[, 2])
-
 systs <- matrix(ncol = 2, nrow = 0)
 
 # For each participant, extract their signal distances from big pairwise matrix
@@ -27,11 +25,9 @@ for (id in speaker.ids) {
   }
   # Loop through each cluster and calculate within-cluster systematicity
   cluster.systs <- c()
-  for (cluster.idx in filter(cluster.info, speaker == id)$cluster_label) {
+  for (cluster.idx in unique(filter(cluster.info, speaker == id)$cluster_label)) {
     referents.in.cluster <-
       filter(cluster.info, speaker == id, cluster_label == cluster.idx)$referent
-    
-    # print(referents.in.cluster)
     
     # if there's only one referent, ignore
     if (length(referents.in.cluster) == 1) {
@@ -42,9 +38,6 @@ for (id in speaker.ids) {
         which((signal.labels$V2 %in% id) &
                 (signal.labels$V3 %in% referents.in.cluster)) # change later for informative column labels
       
-      # print(referents.in.cluster)
-      # print(     (signal.labels$V3 %in% referents.in.cluster))
-      # print(signal.indices)
       n.signals <- length((signal.indices))
       
       signal.dists <- matrix(NA, nrow = n.signals, ncol = n.signals)
@@ -53,9 +46,6 @@ for (id in speaker.ids) {
       
       for (i in 1:n.signals) {
         for (j in 1:n.signals) {
-          # print(signal.indices[i])
-          # print(signal.indices[j])
-          # print(pairwise.dists)
           signal.dist <-
             pairwise.dists[signal.indices[i], signal.indices[j]]
           
@@ -63,11 +53,6 @@ for (id in speaker.ids) {
             strtoi(signal.labels[signal.indices[i], 4]) + 1 # correct for zero-indexing
           color.idx.j <-
             strtoi(signal.labels[signal.indices[j], 4]) + 1
-          # TODO: index by actual data frame title
-          
-          # print(signal.labels[signal.indices[i], 3])
-          # print(color.idx.i)
-          # print(color.idx.j)
           color.dist = euclidean(unlist(wcs$luv[[color.idx.i]]), unlist(wcs$luv[[color.idx.j]]))
           
           signal.dists[i, j] <- signal.dist
@@ -88,3 +73,4 @@ for (id in speaker.ids) {
 colnames(systs) <- c('speaker', 'dcor')
 
 write.csv(systs, here('test/one2one_within_clust_syst.csv'), row.names = FALSE)
+
