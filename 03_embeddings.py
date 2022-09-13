@@ -12,7 +12,6 @@ import seaborn as sns
 from sklearn.manifold import MDS
 
 import params
-import tools
 import tools.cluster
 import tools.preprocess  # delete later
 
@@ -28,6 +27,7 @@ def main(args):
 
 
     print("Calculating 3D embedding")
+
     # multiple dimensions, for calculating discreteness (and clustering)
     mds_discreteness = MDS(
         n_components=params.mds_discreteness["n_components"],

@@ -13,6 +13,9 @@ f3 = os.path.join(output_dir, 'game_scores.json')
 f4 = os.path.join(output_dir, 'systematicity.csv')
 f5 = os.path.join(output_dir, 'discreteness.csv')
 
+f6 = "test/one2one_betwn_clust_syst.csv"
+f7 = "test/one2one_within_clust_syst.csv"
+
 with open(f1, 'r') as f:
     game_info = json.load(f)
 
@@ -24,6 +27,9 @@ with open(f3, 'r') as f:
 
 systematicity = pd.read_csv(f4, index_col="speaker")
 discreteness = pd.read_csv(f5, index_col="speaker")
+
+within_clust_syst = pd.read_csv(f6, index_col="speaker")
+btwn_clust_syst = pd.read_csv(f7, index_col="speaker")
 
 def populate_learn_score(participant):
     """some of the learning scores are missing, so this is for fixing that"""
@@ -44,6 +50,8 @@ for game, pair in game_info.items():
             'discreteness': discreteness.at[participant, "hopkins_stat"],#discreteness[discreteness['participant'] == participant].iloc[0]['hopkins_stat'],
             'learn_score': populate_learn_score(participant),#learn_scores[participant],
             'own_score': game_scores[participant],
+            "btwn_clust_sys": btwn_clust_syst.at[participant, "dcor"],
+            "within_clust_sys": within_clust_syst.at[participant, "dcor"],
         }
         df = df.append(new_row, ignore_index=True)
 
@@ -61,6 +69,6 @@ for game, pair in game_info.items():
 # df['own_score'] = scaler.fit_transform(df[['own_score']].to_numpy())
 # df['comm_score'] = scaler.fit_transform(df[['comm_score']].to_numpy())
 df['learn_score'] = -1 * df['learn_score'] + df['learn_score'].max()
-df.to_csv(os.path.join(output_dir, "one2one_sys_disc_agg.csv"), index=False)
+df.to_csv(os.path.join("test", "one2one_sys_disc_agg.csv"), index=False)
 
 # %%
