@@ -5,15 +5,11 @@ import argparse
 import json
 import os
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 from sklearn.manifold import MDS
 
 import params
-import tools.cluster
-import tools.preprocess  # delete later
 
 
 def main(args):
@@ -26,52 +22,28 @@ def main(args):
     assert pairwise_dists.shape[0] == len(signal_labels)
 
 
-    print("Calculating 3D embedding")
+    print("Calculating embeddings")
 
-    # multiple dimensions, for calculating discreteness (and clustering)
-    mds_discreteness = MDS(
-        n_components=params.mds_discreteness["n_components"],
-        eps=params.mds_discreteness["eps"],
+    mds = MDS(
+        n_components=params.mds["n_components"],
+        eps=params.mds["eps"],
         n_jobs=-1,
         verbose=1,
         dissimilarity="precomputed",
         random_state=params.seed,
-        n_init=params.mds_discreteness["n_init"],
-        max_iter=params.mds_discreteness["max_iter"],
+        n_init=params.mds["n_init"],
+        max_iter=params.mds["max_iter"],
     )
 
-    print("Calculating 2D embedding")
-    # 2d for visualization
-    mds_viz = MDS(
-        n_components=params.mds_viz["n_components"],
-        eps=params.mds_viz["eps"],
-        n_jobs=-1,
-        verbose=1,
-        dissimilarity="precomputed",
-        random_state=params.seed,
-        n_init=params.mds_viz["n_init"],
-        max_iter=params.mds_viz["max_iter"],
-    )
+    embedding = mds.fit_transform(pairwise_dists)
 
-
-    embedding_disc = mds_discreteness.fit_transform(pairwise_dists)
-    embedding_viz = mds_viz.fit_transform(pairwise_dists)
-
-
-    df_embedding_disc = pd.DataFrame(
-        data=np.concatenate((signal_labels, embedding_disc), axis=1),
+    df_embedding = pd.DataFrame(
+        data=np.concatenate((signal_labels, embedding), axis=1),
         columns=["game", "speaker", "referent", "referent_id"]
-        + [f"mds_{i + 1}" for i in range(params.mds_discreteness["n_components"])],
+        + [f"mds_{i + 1}" for i in range(params.mds["n_components"])],
     )
 
-    df_embedding_viz = pd.DataFrame(
-        data=np.concatenate((signal_labels, embedding_viz), axis=1),
-        columns=["game", "speaker", "referent", "referent_id"]
-        + [f"mds_{i + 1}" for i in range(params.mds_viz["n_components"])],
-    )
-
-    df_embedding_disc.to_csv(os.path.join(args.output_dir, f"{args.expt_tag}_embedding_disc.csv"), index=False)
-    df_embedding_viz.to_csv(os.path.join(args.output_dir, f"{args.expt_tag}_embedding_viz.csv"), index=False)
+    df_embedding.to_csv(os.path.join(args.output_dir, f"{args.expt_tag}_embedding.csv"), index=False)
 
 if __name__ == "__main__":
 
