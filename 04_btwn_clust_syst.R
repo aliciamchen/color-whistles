@@ -15,6 +15,8 @@ wcs <- read_json(here("tools/wcs_row_F.json"))
 euclidean <- function(a, b)
   sqrt(sum((a - b) ^ 2))
 
+
+
 speaker.ids <- unique(signal.labels[, 2])
 systs <- matrix(ncol = 2, nrow = 0)
 
@@ -23,8 +25,7 @@ for (id in speaker.ids) {
   if (id == 'init') {
     next
   }
-  # Loop through each cluster and calculate within-cluster systematicity
-  cluster.systs <- c()
+  
   color.centroids <- matrix(ncol = 3, nrow = 0)
   signal.centroids <- matrix(ncol = 2, nrow = 0)
   
@@ -52,7 +53,6 @@ for (id in speaker.ids) {
   }
   
   # Calculate distance correlation
-  # print(color.centroids)
   systematicity <- dcor(color.centroids, signal.centroids)
   systs <- rbind(systs, c(id, systematicity))
 }
