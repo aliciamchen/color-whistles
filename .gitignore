@@ -7,3 +7,7 @@ figs.ipynb
 .Rproj.user
 test_output
 data_old
+scratch
+.RData
+.Rhistory
+.Rproj

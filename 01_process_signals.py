@@ -11,8 +11,6 @@ import pandas as pd
 
 import params
 from tools import preprocess
-from tools.matthias_scripts import process_whistles
-
 
 def fetch_json_signal(df, speaker, referent):
     raw_signal = json.loads(
@@ -134,13 +132,11 @@ def make_learn_df(initialization, df):
         signal_string = signal_string.replace(" ", "")
 
         raw_signal = eval(signal_string)
-        # raw_signal = json.loads(row.signal)
 
         # Some signals are empty or just have one point, we want to ignore those
         if (not raw_signal) or (len(raw_signal) == 1):
             continue
 
-        # print(row.referent_id)
         df_signal = preprocess.make_signal_df(
             raw_signal,
             sampling_freq=params.sampling_freq,
