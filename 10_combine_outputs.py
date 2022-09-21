@@ -13,8 +13,8 @@ f3 = os.path.join(output_dir, 'game_scores.json')
 f4 = os.path.join(output_dir, 'systematicity.csv')
 f5 = os.path.join(output_dir, 'discreteness.csv')
 
-f6 = "test/one2one_betwn_clust_syst.csv"
-f7 = "test/one2one_within_clust_syst.csv"
+f6 = "test/one2one_btwn_clust_syst_new.csv"
+f7 = "test/one2one_within_clust_syst_new.csv"
 
 with open(f1, 'r') as f:
     game_info = json.load(f)
@@ -42,6 +42,7 @@ df = pd.DataFrame(columns=['game', 'speaker', 'systematicity', 'discreteness', '
 
 for game, pair in game_info.items():
     for participant in pair:
+        print(btwn_clust_syst)
         new_row = {
             'game': game,
             # 'participant_idx': #int(discreteness[discreteness['participant'] == participant].iloc[0]['participant_idx']), # this is jank, change later
@@ -69,6 +70,6 @@ for game, pair in game_info.items():
 # df['own_score'] = scaler.fit_transform(df[['own_score']].to_numpy())
 # df['comm_score'] = scaler.fit_transform(df[['comm_score']].to_numpy())
 df['learn_score'] = -1 * df['learn_score'] + df['learn_score'].max()
-df.to_csv(os.path.join("test", "one2one_sys_disc_agg.csv"), index=False)
+df.to_csv(os.path.join("test", "one2one_sys_disc_agg_new.csv"), index=False)
 
 # %%

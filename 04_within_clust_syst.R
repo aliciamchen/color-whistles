@@ -16,13 +16,18 @@ euclidean <- function(a, b)
   sqrt(sum((a - b) ^ 2))
 
 speaker.ids <- unique(signal.labels[, 2])
-systs <- matrix(ncol = 2, nrow = 0)
+btwn.clust.systs <- matrix(ncol = 2, nrow = 0)
+within.clust.systs <- matrix(ncol = 2, nrow = 0)
 
 # For each participant, extract their signal distances from big pairwise matrix
 for (id in speaker.ids) {
   if (id == 'init') {
     next
   }
+  
+  color.medoids <- matrix(ncol = 3, nrow = 0)
+  signal.medoids <- matrix(ncol = 2, nrow = 0)
+  
   # Loop through each cluster and calculate within-cluster systematicity
   cluster.systs <- c()
   for (cluster.idx in unique(filter(cluster.info, speaker == id)$cluster_label)) {
@@ -60,17 +65,33 @@ for (id in speaker.ids) {
         }
       }
    
+      # Within-cluster stuff
       this.cluster.syst <- dcor(signal.dists, color.dists)
       cluster.systs <- c(cluster.systs, this.cluster.syst)
+      
+      # Between-cluster stuff
+      medoid.idx <- which.min(colSums(signal.dists))
+      signal.medoid.label <- signal.labels[signal.indices[medoid.idx], ]
+      signal.medoid <- filter(cluster.info, speaker == signal.medoid.label$V2, referent == signal.medoid.label$V3)[c("mds_1", "mds_2")]
+      color.medoid <- wcs$luv[[strtoi(signal.medoid.label$V4) + 1]]
+      
+      signal.medoids <- rbind(signal.medoids, signal.medoid)
+      color.medoids <- rbind(color.medoids, color.medoid)
     
   }
   
-  # Calculate distance correlation
-  systematicity <- mean(cluster.systs)
-  systs <- rbind(systs, c(id, systematicity))
+  # Within-cluster systematicity
+  within.clust.syst <- mean(cluster.systs)
+  within.clust.systs <- rbind(within.clust.systs, c(id, within.clust.syst))
+  
+  # Between-cluster systematicity
+  btwn.clust.syst <- dcor(color.medoids, signal.medoids)
+  btwn.clust.systs <- rbind(btwn.clust.systs, c(id, btwn.clust.syst))
 }
 
-colnames(systs) <- c('speaker', 'dcor')
+colnames(btwn.clust.systs) <- c('speaker', 'dcor')
+colnames(within.clust.systs) <- c('speaker', 'dcor')
 
-write.csv(systs, here('test/one2one_within_clust_syst.csv'), row.names = FALSE)
+write.csv(btwn.clust.systs, here('test/one2one_btwn_clust_syst_new.csv'), row.names = FALSE)
+write.csv(within.clust.systs, here('test/one2one_within_clust_syst_new.csv'), row.names = FALSE)
 

@@ -22,10 +22,8 @@ def main(args):
     assert pairwise_dists.shape[0] == len(signal_labels)
 
 
-    print("Calculating embeddings")
-
-    mds = MDS(
-        n_components=params.mds["n_components"],
+    mds_2d = MDS(
+        n_components=2,
         eps=params.mds["eps"],
         n_jobs=-1,
         verbose=1,
@@ -35,15 +33,37 @@ def main(args):
         max_iter=params.mds["max_iter"],
     )
 
-    embedding = mds.fit_transform(pairwise_dists)
+    mds_3d = MDS(
+        n_components=3,
+        eps=params.mds["eps"],
+        n_jobs=-1,
+        verbose=1,
+        dissimilarity="precomputed",
+        random_state=params.seed,
+        n_init=params.mds["n_init"],
+        max_iter=params.mds["max_iter"],
+    )
 
-    df_embedding = pd.DataFrame(
-        data=np.concatenate((signal_labels, embedding), axis=1),
+    print("Calculating 2d embedding")
+    embedding_2d = mds_2d.fit_transform(pairwise_dists)
+
+    print("Calculating 3d embedding")
+    embedding_3d = mds_3d.fit_transform(pairwise_dists)
+
+    df_embedding_2d = pd.DataFrame(
+        data=np.concatenate((signal_labels, embedding_2d), axis=1),
         columns=["game", "speaker", "referent", "referent_id"]
         + [f"mds_{i + 1}" for i in range(params.mds["n_components"])],
     )
 
-    df_embedding.to_csv(os.path.join(args.output_dir, f"{args.expt_tag}_embedding.csv"), index=False)
+    df_embedding_3d = pd.DataFrame(
+        data=np.concatenate((signal_labels, embedding_3d), axis=1),
+        columns=["game", "speaker", "referent", "referent_id"]
+        + [f"mds_{i + 1}" for i in range(params.mds["n_components"])],
+    )
+
+    df_embedding_2d.to_csv(os.path.join(args.output_dir, f"{args.expt_tag}_embedding_2d.csv"), index=False)
+    df_embedding_3d.to_csv(os.path.join(args.output_dir, f"{args.expt_tag}_embedding_3d.csv"), index=False)
 
 if __name__ == "__main__":
 
