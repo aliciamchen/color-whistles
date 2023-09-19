@@ -16,6 +16,8 @@ f5 = os.path.join(output_dir, 'discreteness.csv')
 f6 = "test/one2one_btwn_clust_syst_new.csv"
 f7 = "test/one2one_within_clust_syst_new.csv"
 
+f8 = os.path.join(output_dir, 'alignments.csv')
+
 with open(f1, 'r') as f:
     game_info = json.load(f)
 
@@ -31,6 +33,8 @@ discreteness = pd.read_csv(f5, index_col="speaker")
 within_clust_syst = pd.read_csv(f6, index_col="speaker")
 btwn_clust_syst = pd.read_csv(f7, index_col="speaker")
 
+alignment = pd.read_csv(f8, index_col="game")
+
 def populate_learn_score(participant):
     """some of the learning scores are missing, so this is for fixing that"""
     try:
@@ -38,7 +42,7 @@ def populate_learn_score(participant):
     except:
         return np.nan
 
-df = pd.DataFrame(columns=['game', 'speaker', 'systematicity', 'discreteness', 'learn_score', 'own_score', 'comm_score'])
+df = pd.DataFrame(columns=['game', 'speaker', 'systematicity', 'discreteness', 'learn_score', 'own_score', 'comm_score', 'alignment'])
 
 for game, pair in game_info.items():
     for participant in pair:
@@ -53,6 +57,7 @@ for game, pair in game_info.items():
             'own_score': game_scores[participant],
             "btwn_clust_sys": btwn_clust_syst.at[participant, "dcor"],
             "within_clust_sys": within_clust_syst.at[participant, "dcor"],
+            "alignment": alignment.at[game, "dcor"] if game in alignment.index else "NaN"
         }
         df = df.append(new_row, ignore_index=True)
 
