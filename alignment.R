@@ -20,29 +20,11 @@ game.ids <- unique(signal.labels$game)
 
 alignments <- matrix(ncol = 2, nrow = 0)
 
-remove_all_na_rows_and_columns <- function(mat1, mat2) {
-  # Identify rows where all values are NA in either matrix
-  all_na_rows1 <- apply(mat1, 1, function(row) all(is.na(row)))
-  all_na_rows2 <- apply(mat2, 1, function(row) all(is.na(row)))
-  all_na_rows <- all_na_rows1 | all_na_rows2
-
-  # Identify columns where all values are NA in either matrix
-  all_na_cols1 <- apply(mat1, 2, function(col) all(is.na(col)))
-  all_na_cols2 <- apply(mat2, 2, function(col) all(is.na(col)))
-  all_na_cols <- all_na_cols1 | all_na_cols2
-
-  # Remove those rows and columns from both matrices
-  mat1_filtered <- mat1[!all_na_rows, !all_na_cols]
-  mat2_filtered <- mat2[!all_na_rows, !all_na_cols]
-
-  return(list(mat1_filtered = mat1_filtered, mat2_filtered = mat2_filtered))
-}
 
 # Calculate how similar the signal distances are between the two speakers in each game
 # Loop through each game. For each speaker in the game, make one matrix of signal distances
 # Then, calculate distance correlation between the matrices
 for (id in game.ids) {
-
   if (id == "NaN") {
     next
   }
@@ -58,56 +40,55 @@ for (id in game.ids) {
     which(signal.labels$speaker %in% game.speaker.ids[2])
 
   # make array of available signal indices for each speaker
-  signals.speaker1 <- as.integer(unique(signal.labels$referent_id[signal.labels$speaker == game.speaker.ids[1]]))
-  signals.speaker2 <- as.integer(unique(signal.labels$referent_id[signal.labels$speaker == game.speaker.ids[2]]))
+  # signals.speaker1 <-
+  #   as.integer(unique(signal.labels$referent_id[signal.labels$speaker == game.speaker.ids[1]]))
+  # signals.speaker2 <-
+  #   as.integer(unique(signal.labels$referent_id[signal.labels$speaker == game.speaker.ids[2]]))
 
   n.signals <- 40
 
 
-  # Make a matrix of signal distances for each speaker
-  game.signal.dists.speaker1 <-
-    matrix(NA,
-           nrow = 40,
-           ncol = 40)
-  game.signal.dists.speaker2 <-
-    matrix(NA,
-           nrow = 40,
-           ncol = 40)
+  # Make an empty vector of signal distances for each speaker
+  game.signal.dists <- numeric(0)
+
+  # For each signal for speaker 1, find the corresponding signal for speaker 2
+  # Then find distance between those two signals
+  for (i in 1:n.signals) {
+    # find the referent id for the signal for speaker 1
+    speaker1.signal.referent_id <-
+      signal.labels$referent_id[speaker1.signal.indices[i]]
+    # find the signal for speaker 2 that corresponds to the same referent
+    speaker2.signal.index <-
+      speaker2.signal.indices[signal.labels$referent_id[speaker2.signal.indices] == speaker1.signal.referent_id]
 
 
-  for (i in signals.speaker1) {
-    for (j in signals.speaker1) {
-      speaker1.signal.dist <-
-        pairwise.dists[speaker1.signal.indices[i + 1], speaker1.signal.indices[j + 1]]
+    # find the distance between the two signals
+    speakers.signal.dist <-
+      pairwise.dists[speaker1.signal.indices[i], speaker2.signal.index]
 
-      game.signal.dists.speaker1[i + 1, j + 1] <- speaker1.signal.dist
-    }
+
+    # find the distance between the two signals
+    # speakers.signal.dist <-
+    #   pairwise.dists[speaker1.signal.indices[i], speaker2.signal.indices[i]]
+
+    # add the distance to the vector of distances
+    game.signal.dists <-
+      c(game.signal.dists, speakers.signal.dist)
+
+
   }
+  # Calculate the mean of the list of distances, make sure to exclude NaNs
 
-  for (i in signals.speaker2) {
-    for (j in signals.speaker2) {
-      speaker2.signal.dist <-
-        pairwise.dists[speaker2.signal.indices[i + 1], speaker2.signal.indices[j + 1]]
-
-      game.signal.dists.speaker2[i+ 1, j + 1] <- speaker2.signal.dist
-    }
-  }
-
-
-  # remove rows and columns that are completely comprised of missing values
-  result <- remove_all_na_rows_and_columns(game.signal.dists.speaker1, game.signal.dists.speaker2)
-  game.signal.dists.speaker1 <- result$mat1_filtered
-  game.signal.dists.speaker2 <- result$mat2_filtered
-
-
-
-  # Calculate distance correlation between the two matrices
   alignment <-
-    dcor(game.signal.dists.speaker1, game.signal.dists.speaker2)
+    mean(game.signal.dists, na.rm = TRUE)
   alignments <- rbind(alignments, c(id, alignment))
 }
 
-colnames(alignments) <- c("game", "dcor")
+colnames(alignments) <- c("game", "dist")
+
+# Normalize s.t. 0 is least aligned and 1 is most aligned
 
 
-write.csv(alignments, here("test/one2one_alignments.csv"), row.names = FALSE)
+
+write.csv(alignments, here("test_output/alignments.csv"), row.names = FALSE)
+
