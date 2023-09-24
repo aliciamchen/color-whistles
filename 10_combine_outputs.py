@@ -57,7 +57,7 @@ for game, pair in game_info.items():
             'own_score': game_scores[participant],
             "btwn_clust_sys": btwn_clust_syst.at[participant, "dcor"],
             "within_clust_sys": within_clust_syst.at[participant, "dcor"],
-            "alignment": alignment.at[game, "dcor"] if game in alignment.index else "NaN"
+            "alignment": alignment.at[game, "dist"] if game in alignment.index else "NaN"
         }
         df = df.append(new_row, ignore_index=True)
 
@@ -75,6 +75,7 @@ for game, pair in game_info.items():
 # df['own_score'] = scaler.fit_transform(df[['own_score']].to_numpy())
 # df['comm_score'] = scaler.fit_transform(df[['comm_score']].to_numpy())
 df['learn_score'] = -1 * df['learn_score'] + df['learn_score'].max()
+df['alignment'] = -1 * df['alignment'] + df['alignment'].max()
 df.to_csv(os.path.join("test", "one2one_sys_disc_agg_new.csv"), index=False)
 
 # %%

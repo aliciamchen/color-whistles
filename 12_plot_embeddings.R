@@ -3,9 +3,9 @@ library(tidyverse)
 library(ggplot2)
 library(ggthemes)
 
-theme_set(theme_few(base_size = 15))
+theme_set(theme_classic(base_size = 15))
 d <- read.csv(here("test_output/embedding_viz.csv"))
-d.metrics <- read.csv((here("test_output/one2one_sys_disc_agg.csv")))
+d.metrics <- read.csv((here("test/one2one_sys_disc_agg_new.csv")))
 
 
 # Make color mapping vector
@@ -16,6 +16,7 @@ names(col) <- col
 comm_list <- split(d.metrics$comm_score, d.metrics$speaker)
 disc_list <- split(d.metrics$discreteness, d.metrics$speaker)
 sys_list <- split(d.metrics$systematicity, d.metrics$speaker)
+align_list <- split(d.metrics$alignment, d.metrics$speaker)
 
 # Plot
 facet_titler <-
@@ -31,7 +32,10 @@ facet_titler <-
       round(as.numeric(unlist(disc_list[string])), 3),
       "\n",
       "sys ",
-      round(as.numeric(unlist(sys_list[string])), 3) 
+      round(as.numeric(unlist(sys_list[string])), 3),
+      "\n",
+      "al ",
+      round(as.numeric(unlist(align_list[string])), 3) 
     )
     
   }
@@ -55,8 +59,8 @@ for (g in unique(d$game)) {
 
 # Big plot
 
-ggplot(d, aes(x = mds_1, y = mds_2)) +
-  geom_point(aes(color = referent), size = 1.5, alpha = 0.6) +
+f = ggplot(d, aes(x = mds_1, y = mds_2)) +
+  geom_point(aes(color = referent), size = 2.7, alpha = 0.5, stroke = 0) +
   geom_point(
     data = d %>% filter(speaker == 'init'),
     aes(fill = referent),
@@ -67,5 +71,13 @@ ggplot(d, aes(x = mds_1, y = mds_2)) +
   scale_color_manual(values = col) +
   scale_fill_manual(values = col) +
   theme(legend.position = "none") +
-  # coord_fixed() +
-  lims(x = c(-7, 6), y = c(-5, 5))
+  coord_fixed() +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+  # lims(x = c(-7, 6), y = c(-5, 5))
+
+f
+
+ggsave(here("figures/mds_all.pdf"), f, width = 4, height = 6)
