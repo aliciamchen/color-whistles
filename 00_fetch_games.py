@@ -1,8 +1,3 @@
-"""
-Get rid of incomplete games, extract `.json` signals
-Assign participant indices
-"""
-
 import argparse
 import json
 import os
@@ -84,7 +79,6 @@ def main(args):
 
     f_learn = args.learn_raw
     f_comm = args.comm_raw
-    label = args.expt_tag
     output_dir = args.output_dir
 
     if not os.path.exists(output_dir):
@@ -98,10 +92,10 @@ def main(args):
     game_info = fetch_game_info(df_comm_cleaned)
     df_learn_cleaned = exclude_incomplete_learn(df_learn, game_info)
 
-    df_comm_cleaned.to_csv(os.path.join(output_dir, f"{label}_comm.zip"), index=False)
-    df_learn_cleaned.to_csv(os.path.join(output_dir, f"{label}_learn.zip"), index=False)
+    df_comm_cleaned.to_csv(os.path.join(output_dir, "comm.zip"), index=False)
+    df_learn_cleaned.to_csv(os.path.join(output_dir, "learn.zip"), index=False)
 
-    with open(os.path.join(output_dir, f"{label}_game_info.json"), "w") as f:
+    with open(os.path.join(output_dir, "game_info.json"), "w") as f:
         json.dump(game_info, f)
 
 
@@ -109,7 +103,6 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--expt_tag", required=True, type=str, help="which experiment? for labeling files")
     parser.add_argument(
         "--learn_raw", required=True, type=str, help="file for raw learning data"
     )
