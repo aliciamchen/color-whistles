@@ -57,3 +57,7 @@ stimuli = {
         "#bd5697",
     ],
 }
+
+cluster_params = {
+    "min_cluster_size": [2, 3, 4, 5]
+}

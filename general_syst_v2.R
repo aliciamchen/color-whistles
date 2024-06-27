@@ -3,7 +3,7 @@ library(tidyverse)
 library(energy)
 library(jsonlite)
 
-set.seed(123)  # For reproducibility
+set.seed(111)  # For reproducibility
 
 pairwise.dists <- as.matrix(read_table(here("test_output/pairwise_dists.txt"), col_names = FALSE))
 signal.labels <- as.data.frame(read_json(here("test_output/all_signal_labels.json"), simplifyVector = TRUE))
@@ -54,10 +54,10 @@ for (id in speaker.ids) {
   
   ### Do permutation test
   # Initialize a vector to store the results of the permutation test
-  permuted_dc <- numeric(10000)  # for 1000 permutations
+  permuted_dc <- numeric(1000)  # for 1000 permutations
   
   # Permutation test
-  for(i in 1:10000) {
+  for(i in 1:1000) {
     # Shuffle the rows of the color_distances matrix
     shuffled.color.dists <- color.dists[sample(nrow(color.dists)), ]
     
@@ -93,5 +93,5 @@ grid(nx = NULL, ny = NULL, col = "gray", lty = "dotted")
 #   xlab("Values") + 
 #   ylab("Frequency")
 
-write.csv(systs, here('test/syst_v2.csv'), row.names = FALSE)
+write.csv(systs, here('test_output/syst_v2.csv'), row.names = FALSE)
 

@@ -3,26 +3,29 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from skimage.color import luv2rgb
 
-def plot_sound(df, idx, ax=None):
+def plot_sound(df, referent_id, ax=None):
     """Plot a single sound.
 
     Args:
         df (DataFrame): dataframe for a specific participant
-        idx (int): index of sound (0-39) to plot
+        referent_id (int): index of sound (0-39) to plot
     """
     # plt.figure()
     if ax is None:
         fig, ax = plt.subplots()
 
-    ax.scatter(df[(df["idx"] == idx)]["t"], df[df["idx"] == idx]["signal"], s=130)
+    ax.plot(df[(df["referent_id"] == referent_id)]["t"], df[df["referent_id"] == referent_id]["signal"], color="black", linewidth=1, linestyle="solid")
     ax.plot(
-        df[(df["idx"] == idx)]["t"],
-        df[(df["idx"] == idx)]["val"],
-        color="r",
+        df[(df["referent_id"] == referent_id)]["t"],
+        df[(df["referent_id"] == referent_id)]["val"],
+        color="lightgrey",
         linestyle="--",
+        linewidth=0.5
     )
 
-    ax.set_title(f"Sound {idx}")
+    referent = df[df["referent_id"] == referent_id]['referent'].iloc[0]
+
+    ax.set_title(f"Referent {referent} Participant {df['speaker'].iloc[0]}")
     # plt.show()
 
 

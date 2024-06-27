@@ -1,4 +1,4 @@
-name: base
+name: colors
 channels:
   - conda-forge
   - defaults
@@ -190,4 +190,4 @@ dependencies:
   - zstd=1.5.5
   - pip:
       - scikit-learn==1.4.2
-prefix: /Users/aliciachen/miniconda3
+prefix: /Users/aliciachen/miniconda3/envs

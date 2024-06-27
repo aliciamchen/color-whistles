@@ -3,8 +3,8 @@ library(tidyverse)
 library(energy)
 library(jsonlite)
 
-pairwise.dists <- as.matrix(read_table(here("test/one2many_pairwise_dists.txt"), col_names = FALSE))
-signal.labels <- as.data.frame(read_json(here("test/one2many_signal_labels.json"), simplifyVector = TRUE))
+pairwise.dists <- as.matrix(read_table(here("test_output/pairwise_dists.txt"), col_names = FALSE))
+signal.labels <- as.data.frame(read_json(here("test_output/all_signal_labels.json"), simplifyVector = TRUE))
 wcs <- read_json(here("tools/wcs_row_F.json"))
 
 euclidean <- function(a, b) sqrt(sum((a - b)^2))

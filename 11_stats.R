@@ -9,7 +9,7 @@ library(readr)
 
 theme_set(theme_classic(base_size = 20))
 
-d <- read.csv(here('test/one2one_sys_disc_agg_new.csv')) %>%
+d <- read.csv(here('test_output/all_calculations.csv')) %>%
   mutate(
     paired_comm_score = (own_score + comm_score) / 2,
     learn_score_norm = (learn_score - min(learn_score, na.rm = TRUE)) / (max(learn_score, na.rm = TRUE) - min(learn_score, na.rm = TRUE)) ,
@@ -76,6 +76,8 @@ comm.score.mod <- gam(score ~ s(round, bs = "cs"),
 summary(comm.score.mod)
 
 # TODO: analysis for performance above chance
+t_test_result <- t.test(d.comm$score, mu=0.5)
+print(t_test_result)
 
 # Try linear model
 comm.score.mod.linear <- lmer(score ~ 1 + round + (1 |
@@ -92,21 +94,55 @@ ggplot(d, aes(x = systematicity, y = discreteness, col = comm_score)) +
   theme(axis.ticks.x = element_blank(),
         axis.ticks.y = element_blank())
 
+
+
 ggsave(here("figures/disc_sys_perf.pdf"),
        width = 6.5,
        height = 4.5)
 
-# discrete systems are also systematic
-disc.sys.mod <- lm(discreteness ~ 1 + systematicity,
-                   data = d)
+# within-cluster and between-cluster systematiicty
+ggplot(d, aes(x = within_clust_sys, y = discreteness, col = comm_score)) +
+  geom_point(size = 3.3) +
+  labs(title = "within clust sys") +
+  theme(axis.ticks.x = element_blank(),
+        axis.ticks.y = element_blank())
 
+ggplot(d, aes(x = btwn_clust_sys, y = discreteness, col = comm_score)) +
+  geom_point(size = 3.3) +
+  labs(title = "between clust sys") +
+  theme(axis.ticks.x = element_blank(),
+        axis.ticks.y = element_blank())
+
+
+ggplot(d, aes(x = within_clust_sys, y = comm_score)) +
+  geom_point(size = 3.3) +
+  labs(title = "within_clust_sys") +
+  theme(axis.ticks.x = element_blank(),
+        axis.ticks.y = element_blank())
+
+ggplot(d, aes(x = within_clust_sys, y = systematicity)) +
+  geom_point(size = 3.3) +
+  labs(title = "within_clust_sys") +
+  theme(axis.ticks.x = element_blank(),
+        axis.ticks.y = element_blank())
+
+# discrete systems are also systematic
+dis.sys.cor <- cor.test(d$discreteness, d$systematicity)
+dis.sys.cor
 summary(disc.sys.mod)
 
 
 
 # relationship between discreteness, systematicity, and performance
 perf.mod <-
-  lm(scale(comm_score) ~ 1 + scale(discreteness) * scale(systematicity),
+  lm(comm_score ~ 1 + discreteness + systematicity,
+     data = d)
+
+summary(perf.mod)
+
+# relationship between discreteness, systematicity, alignment
+perf.mod <-
+  lm(comm_score ~ 1 + discreteness + systematicity + alignment_norm,
      data = d)
 
 summary(perf.mod)

@@ -30,7 +30,7 @@ class Colors:
         assert len(self.wcs_cnums) == len(self.lab) == len(self.luv) == len(self.rgb)
 
         # Calculate color distances in luv space
-        # self.luv_dists = distance_matrix(self.luv, self.luv)
+        self.luv_dists = distance_matrix(self.luv, self.luv)
 
 
     def display_colors(self, **kwargs):

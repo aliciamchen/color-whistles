@@ -13,6 +13,7 @@ import params
 
 # %% Load data
 
+
 # load in matrix of all pairwise distances
 pairwise_dists = np.loadtxt("test_output/pairwise_dists.txt")
 signal_labels = pd.read_json("test_output/all_signal_labels.json")
@@ -35,7 +36,6 @@ for speaker in speaker_ids:
     n_signals = len(indices)
 
     signal_dists = pairwise_dists[np.ix_(indices, indices)]
-    # print(signal_dists)
 
     for min_cluster_size in params.cluster_params["min_cluster_size"]:
         hdbscan = HDBSCAN(
@@ -61,3 +61,14 @@ for speaker in speaker_ids:
 results = pd.concat(dfs_to_save).reset_index()
 results.to_csv("test_output/cluster_output.csv", index=False)
 
+# %% Add cluster info to embedding_viz
+# For min cluster size = 5
+
+embedding_viz = pd.read_csv("test_output/embedding_viz.csv").drop(columns=["cluster_label"])
+
+# for min cluster size = 5, add cluster labels to embedding_viz
+
+results_5 = results[results["min_cluster_size"] == 3]
+embedding_viz = embedding_viz.merge(results_5, on=["game", "speaker", "referent", "referent_id"], how="left")
+embedding_viz.to_csv("test_output/embedding_viz_new.csv", index=False)
+# %%

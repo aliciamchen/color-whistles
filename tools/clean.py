@@ -6,32 +6,6 @@ import os
 import json
 
 
-def clean_df(df):
-
-    games = pd.unique(df['gameid'])
-    speakers = pd.unique(df['speakerid'])
-
-    # get rid of games that are fewer than 80 rounds
-
-    for game in games:
-        if len(df[df['gameid'] == game].index) < 80:
-            df.drop(df[df['gameid'] == game].index, inplace = True)
-
-    return df
-    # games_cleaned = pd.unique(df['gameid'])
-
-
-def make_game_info(df):
-    # For each game, make a dict of which speakers participate in the game
-    games = pd.unique(df['gameid'])
-    speaker_game_info = {}
-    for game in games:
-        speakers_ = df[df['gameid'] == game]['speakerid'].unique()
-        speakers_ = list(speakers_)
-        speaker_game_info[game] = speakers_
-
-    return speaker_game_info
-
 def make_json_signals(df):
 
     speakers = pd.unique(df['speakerid'])

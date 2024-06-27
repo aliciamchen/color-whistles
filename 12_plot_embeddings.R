@@ -4,7 +4,7 @@ library(ggplot2)
 library(ggthemes)
 
 theme_set(theme_classic(base_size = 15))
-d <- read.csv(here("test_output/embedding_viz.csv"))
+d <- read.csv(here("test_output/embedding_viz_new.csv"))
 d.metrics <- read.csv((here("test/one2one_sys_disc_agg_new.csv")))
 
 
@@ -40,6 +40,10 @@ facet_titler <-
     )
     
   }
+
+
+# TODO: make outliers a diff shape?? 
+
 
 for (g in unique(d$game)) {
   d.this.game = d %>% filter(game == g)
@@ -88,7 +92,7 @@ f = ggplot(d, aes(x = mds_1, y = mds_2)) +
 
 f
 
-ggsave(here("figures/mds_all.pdf"),
+ggsave(here("figures/mds_all_init.pdf"),
        f,
        width = 4,
        height = 6)
