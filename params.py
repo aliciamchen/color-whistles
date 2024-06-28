@@ -7,7 +7,7 @@ sampling_freq = 50
 n_rounds = 80
 
 seed = 88
-learning_sigs_dir = "stim/learning_signals"
+learning_sigs_dir = "stim"
 
 mds = {"eps": 1e-9, "n_init": 40, "max_iter": 5000}
 
@@ -39,5 +39,5 @@ stimuli = {
 }
 
 cluster_params = {
-    "min_cluster_size": [2, 3, 4, 5]
+    "min_cluster_size": [2, 3, 4, 6, 7]
 }

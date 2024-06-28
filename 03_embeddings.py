@@ -1,7 +1,4 @@
 
-# quick script to csompute 3d MDS embeddings per participant, both for discreteness calculations and for viz purposes
-# for later: Plot clusters (using code from before) without color centroids and with color centroids; save to file
-# python 03_embeddings.py --expt_tag one2one --dists_file test_output/pairwise_dists.txt --labels_file test_output/all_signal_labels.json --output_dir test_output
 import argparse
 import json
 import os
@@ -27,18 +24,17 @@ def main(args):
         n_components=1,
         eps=params.mds["eps"],
         n_jobs=-1,
-        verbose=1,
         dissimilarity="precomputed",
         random_state=params.seed,
         n_init=params.mds["n_init"],
         max_iter=params.mds["max_iter"],
     )
 
+
     mds_2d = MDS(
         n_components=2,
         eps=params.mds["eps"],
         n_jobs=-1,
-        verbose=1,
         dissimilarity="precomputed",
         random_state=params.seed,
         n_init=params.mds["n_init"],
@@ -49,7 +45,6 @@ def main(args):
         n_components=3,
         eps=params.mds["eps"],
         n_jobs=-1,
-        verbose=1,
         dissimilarity="precomputed",
         random_state=params.seed,
         n_init=params.mds["n_init"],
@@ -65,7 +60,7 @@ def main(args):
         + [f"mds_{i + 1}" for i in range(1)],
     )
 
-    df_embedding_1d.to_csv(os.path.join(args.output_dir, f"{args.expt_tag}_embedding_1d.csv"), index=False)
+    df_embedding_1d.to_csv(os.path.join(args.output_dir, "embedding_1d.csv"), index=False)
 
 
     print("Calculating 2d embedding")
@@ -77,7 +72,7 @@ def main(args):
         + [f"mds_{i + 1}" for i in range(2)],
     )
 
-    df_embedding_2d.to_csv(os.path.join(args.output_dir, f"{args.expt_tag}_embedding_2d.csv"), index=False)
+    df_embedding_2d.to_csv(os.path.join(args.output_dir, "embedding_2d.csv"), index=False)
 
     print("Calculating 3d embedding")
     embedding_3d = mds_3d.fit_transform(pairwise_dists)
@@ -88,13 +83,12 @@ def main(args):
         + [f"mds_{i + 1}" for i in range(3)],
     )
 
-    df_embedding_3d.to_csv(os.path.join(args.output_dir, f"{args.expt_tag}_embedding_3d.csv"), index=False)
+    df_embedding_3d.to_csv(os.path.join(args.output_dir, "embedding_3d.csv"), index=False)
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--expt_tag", required=True, type=str, help="which experiment? for labeling files")
     parser.add_argument("--dists_file", required=True, type=str, help="`.txt` pairwise dists file")
     parser.add_argument("--labels_file", required=True, type=str, help="`.json` labels file")
     parser.add_argument("--output_dir", required=True, type=str, help="plac to save output")

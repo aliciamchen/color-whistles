@@ -3,6 +3,8 @@ library(tidyverse)
 library(energy)
 library(jsonlite)
 
+set.seed(111)  # For reproducibility
+
 pairwise.dists <- as.matrix(read_table(here("test_output/pairwise_dists.txt"), col_names = FALSE))
 signal.labels <- as.data.frame(read_json(here("test_output/all_signal_labels.json"), simplifyVector = TRUE))
 wcs <- read_json(here("tools/wcs_row_F.json"))
@@ -13,7 +15,8 @@ euclidean <- function(a, b) sqrt(sum((a - b)^2))
 speaker.ids <- unique(signal.labels[, 2])
 
 
-systs <- matrix(ncol = 2, nrow = 0)
+systs <- matrix(ncol = 3, nrow = 0)
+
 
 # For each participant, extract their signal distances from big pairwise matrix
 for (id in speaker.ids) {
@@ -47,10 +50,48 @@ for (id in speaker.ids) {
 
   # Calculate distance correlation
   systematicity <- dcor(signal.dists, color.dists)
-  systs <- rbind(systs, c(id, systematicity))
+
+
+  ### Do permutation test
+  # Initialize a vector to store the results of the permutation test
+  permuted_dc <- numeric(1000)  # for 1000 permutations
+
+  # Permutation test
+  for(i in 1:1000) {
+    # Shuffle the rows of the color_distances matrix
+    shuffled.color.dists <- color.dists[sample(nrow(color.dists)), ]
+
+    # Calculate and store the distance correlation
+    permuted_dc[i] <- dcor(signal.dists, shuffled.color.dists)
+  }
+
+  # Assess significance
+  observed_rank <- sum(permuted_dc >= systematicity) + 1
+  p_value <- observed_rank / (length(permuted_dc) + 1)
+
+
+  systs <- rbind(systs, c(id, systematicity, p_value))
 }
 
-colnames(systs) <- c('speaker', 'dcor')
+colnames(systs) <- c('speaker', 'dcor', 'p')
+systs <- as.data.frame(systs)
 
-write.csv(systs, here('test/one2many_systematicity.csv'), row.names = FALSE)
+hist(as.numeric(systs[2:51, ]$p),
+     breaks = 100, # Adjusts the number of bins
+     col = "skyblue",
+     main = "Histogram of P-values",
+     xlab = "P-value",
+     border = "black")
+
+# Adding grid lines for better readability
+grid(nx = NULL, ny = NULL, col = "gray", lty = "dotted")
+
+# ggplot(as.data.frame(systs), aes(x = p)) +
+#   geom_histogram(fill = "blue", color = "black", binwidth = 0.01, stat = "count") +
+#   theme_minimal() +
+#   ggtitle("Histogram of Values") +
+#   xlab("Values") +
+#   ylab("Frequency")
+
+write.csv(systs, here('test_output/syst_v2.csv'), row.names = FALSE)
 

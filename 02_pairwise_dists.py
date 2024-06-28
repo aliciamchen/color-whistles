@@ -1,6 +1,5 @@
 """
-Calculate pairwise distances between all signals (including input) for MDS projection
-Note: this takes >2hrs to run
+Calculate pairwise distances between all signals (including input)
 """
 import argparse
 import json
@@ -15,7 +14,7 @@ from tslearn.utils import to_time_series_dataset
 
 def main(args):
 
-    print(f"Calculating pairwise distances for {args.expt_tag}")
+    print(f"Calculating pairwise distances")
 
     df_init = pd.read_csv(args.init_signals)
     df_comm = pd.read_csv(args.comm_signals)
@@ -42,12 +41,12 @@ def main(args):
     pairwise_dists = cdist_dtw(X, n_jobs=-1, verbose=1)
 
     with open(
-        os.path.join(args.output_dir, f"{args.expt_tag}_signal_labels.json"), "w"
+        os.path.join(args.output_dir, "signal_labels.json"), "w"
     ) as f:
         json.dump(list(signal_labels), f)
 
     np.savetxt(
-        os.path.join(args.output_dir, f"{args.expt_tag}_pairwise_dists.txt"),
+        os.path.join(args.output_dir, "pairwise_dists.txt"),
         pairwise_dists,
         comments="Pairwise signal similarities, including learning signals (see `all_signal_labels.json` for labels)",
     )
@@ -56,12 +55,6 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--expt_tag",
-        required=True,
-        type=str,
-        help="which experiment? for labeling files",
-    )
     parser.add_argument(
         "--init_signals", required=True, type=str, help="csv of init signals"
     )
