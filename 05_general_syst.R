@@ -13,8 +13,15 @@ output.dir <- args[3]
 
 
 pairwise.dists <- as.matrix(read_table(here(dists.file), col_names = FALSE))
-signal.labels <- as.data.frame(read_json(here(labels.file), simplifyVector = TRUE))
-wcs <- read_json(here("tools/wcs_row_F.json"))
+wcs <- read_json(here("stim/wcs_row_F.json"))
+
+# Read the JSON content as a character string, replace NaNs with "NaN" (as a string), and parse it
+json_content <- readLines(here(labels.file), warn = FALSE)
+json_text <- paste(json_content, collapse = "\n")
+modified_json_text <- gsub("\\bNaN\\b", '"NaN"', json_text)
+parsed_json <- fromJSON(modified_json_text, simplifyVector = TRUE)
+signal.labels <- as.data.frame(parsed_json)
+# signal.labels <- as.data.frame(read_json(here(labels.file), simplifyVector = TRUE))
 
 euclidean <- function(a, b) sqrt(sum((a - b)^2))
 
@@ -24,7 +31,7 @@ speaker.ids <- unique(signal.labels[, 2])
 
 systs <- matrix(ncol = 3, nrow = 0)
 
-
+print("Calculating systematicity...")
 # For each participant, extract their signal distances from big pairwise matrix
 for (id in speaker.ids) {
 
@@ -54,9 +61,7 @@ for (id in speaker.ids) {
 
 
   ### Do permutation test
-  permuted_dc <- numeric(10000)  # for 1000 permutations
-
-  # Permutation test
+  permuted_dc <- numeric(10000)
   for(i in 1:10000) {
     shuffled.color.dists <- color.dists[sample(nrow(color.dists)), ]
 
@@ -74,6 +79,8 @@ for (id in speaker.ids) {
 colnames(systs) <- c('speaker', 'dcor', 'p')
 systs <- as.data.frame(systs)
 
+print("Systematicity calculations complete")
+
 # hist(as.numeric(systs[2:51, ]$p),
 #      breaks = 100, # Adjusts the number of bins
 #      col = "skyblue",
@@ -86,5 +93,5 @@ systs <- as.data.frame(systs)
 
 
 
-write.csv(systs, here(paste0(output.dir, "/metrics/systematicity.csv")), row.names = FALSE)
+write.csv(systs, here(paste0(output.dir, "/systematicity.csv")), row.names = FALSE)
 
