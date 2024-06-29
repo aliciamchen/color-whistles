@@ -3,11 +3,17 @@ library(tidyverse)
 library(energy)
 library(jsonlite)
 
+args <- commandArgs(trailingOnly = TRUE)
+
+dists.file <- args[1]
+labels.file <- args[2]
+output.dir <- args[3]
+
 pairwise.dists <-
-  as.matrix(read_table(here("outputs/pairwise_dists.txt"), col_names = FALSE))
+  as.matrix(read_table(here(dists.file), col_names = FALSE))
 
   # Read the JSON content as a character string, replace NaNs with "NaN" (as a string), and parse it
-json_content <- readLines(here("outputs/signal_labels.json"), warn = FALSE)
+json_content <- readLines(here(labels.file), warn = FALSE)
 json_text <- paste(json_content, collapse = "\n")
 modified_json_text <- gsub("\\bNaN\\b", '"NaN"', json_text)
 parsed_json <- fromJSON(modified_json_text, simplifyVector = TRUE)
@@ -104,5 +110,5 @@ colnames(alignments) <- c("game", "dist")
 
 
 
-write.csv(alignments, here("outputs/metrics/alignments.csv"), row.names = FALSE)
+write.csv(alignments, here(paste0(output.dir, "/alignments.csv")), row.names = FALSE)
 

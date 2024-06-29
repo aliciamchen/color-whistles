@@ -1,3 +1,4 @@
+"Find sample signals"
 # %%
 import numpy as np
 import pandas as pd
