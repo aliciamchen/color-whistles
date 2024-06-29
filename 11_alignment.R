@@ -4,16 +4,30 @@ library(energy)
 library(jsonlite)
 
 pairwise.dists <-
-  as.matrix(read_table(here("test_output/pairwise_dists.txt"), col_names = FALSE))
-signal.labels <-
-  as.data.frame(read_json(here("test_output/all_signal_labels.json"), simplifyVector = TRUE)) %>%
+  as.matrix(read_table(here("outputs/pairwise_dists.txt"), col_names = FALSE))
+
+  # Read the JSON content as a character string, replace NaNs with "NaN" (as a string), and parse it
+json_content <- readLines(here("outputs/signal_labels.json"), warn = FALSE)
+json_text <- paste(json_content, collapse = "\n")
+modified_json_text <- gsub("\\bNaN\\b", '"NaN"', json_text)
+parsed_json <- fromJSON(modified_json_text, simplifyVector = TRUE)
+signal.labels <- as.data.frame(parsed_json) %>%
   rename(
     game = V1,
     speaker = V2,
     referent = V3,
     referent_id = V4
   )
-wcs <- read_json(here("tools/wcs_row_F.json"))
+
+# signal.labels <-
+#   as.data.frame(read_json(here("outputs/all_signal_labels.json"), simplifyVector = TRUE)) %>%
+#   rename(
+#     game = V1,
+#     speaker = V2,
+#     referent = V3,
+#     referent_id = V4
+#   )
+wcs <- read_json(here("stim/wcs_row_F.json"))
 
 speaker.ids <- unique(signal.labels$speaker)
 game.ids <- unique(signal.labels$game)
@@ -90,5 +104,5 @@ colnames(alignments) <- c("game", "dist")
 
 
 
-write.csv(alignments, here("test_output/alignments.csv"), row.names = FALSE)
+write.csv(alignments, here("outputs/metrics/alignments.csv"), row.names = FALSE)
 
