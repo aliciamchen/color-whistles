@@ -2,7 +2,7 @@ import argparse
 import os
 import numpy as np
 import pandas as pd
-from sklearn.cluster import HDBSCAN
+from hdbscan import HDBSCAN
 import params
 
 
@@ -19,11 +19,11 @@ def main(args):
     dfs_to_save = []
 
     for speaker in speaker_ids:
+        print(f"Clustering signals for speaker {speaker}")
         if speaker == "init":
             continue
 
         indices = np.where(signal_labels["speaker"] == speaker)[0]
-        n_signals = len(indices)
 
         signal_dists = pairwise_dists[np.ix_(indices, indices)]
 
@@ -45,15 +45,6 @@ def main(args):
 
     results = pd.concat(dfs_to_save).reset_index()
     results.to_csv(os.path.join(args.output_dir, "cluster_output.csv"), index=False)
-
-
-    # for min cluster size = 5, add cluster labels to embedding_viz
-    # embedding_viz = pd.read_csv(os.path.join(args.output_dir, "embedding_viz.csv")).drop(columns=["cluster_label"])
-
-    # results_5 = results[results["min_cluster_size"] == 3]
-
-    # embedding_viz = embedding_viz.merge(results_5, on=["game", "speaker", "referent", "referent_id"], how="left")
-    # embedding_viz.to_csv(os.path.join(args.output_dir, "embedding_viz_w_clusters.csv"), index=False)
 
 
 if __name__ == "__main__":
