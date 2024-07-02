@@ -101,7 +101,7 @@ ggplot(d.learn.comm, aes(x = round, y = empirical_stat)) +
         axis.ticks.y = element_blank()) +
   ylim(0.35, 1)
 
-ggsave(here("figures/comm_improvement.pdf"),
+ggsave(here("figs/comm_improvement.pdf"),
        width = 4,
        height = 4.5)
 ```
@@ -159,7 +159,7 @@ lims(x = c(-7, 6), y = c(-5, 5))
 
 f
 
-ggsave(here("figures/mds_all_init.pdf"),
+ggsave(here("figs/mds_all_init.pdf"),
        f,
        width = 4,
        height = 6)
@@ -222,7 +222,7 @@ ggplot(data, aes(x=mds_1, y=position, color=referent)) +
         strip.text = element_blank(),  # Remove the game labels from the facet strips
         strip.background = element_blank())
 
-ggsave(here("figures/1d_embeddings.pdf"), width = 18, height = 10)
+ggsave(here("figs/1d_embeddings.pdf"), width = 18, height = 10)
 ```
 
 # What properties led to successful communication?
@@ -250,7 +250,7 @@ ggplot(
         axis.ticks.y = element_blank()) +
     ylim(0.35, 1)
 
-ggsave(here("figures/alignment.pdf"),
+ggsave(here("figs/alignment.pdf"),
        width = 5,
        height = 4.5)
 ```
@@ -292,7 +292,7 @@ ggplot(all_calculations, aes(x = hopkins, y = comm_score, color = systematicity)
         axis.ticks.y = element_blank(),
         legend.position = "bottom")
 
-ggsave(here("figures/hopkins_comm.pdf"),
+ggsave(here("figs/hopkins_comm.pdf"),
        width = 7,
        height = 6)
 ```
@@ -320,7 +320,7 @@ ggplot(df_systematicity %>% filter(min_cluster_size == 2), aes(x = n_clusters, y
   theme(axis.ticks.x = element_blank(),
         axis.ticks.y = element_blank())
 
-ggsave(here("figures/n_clusters_comm.pdf"),
+ggsave(here("figs/n_clusters_comm.pdf"),
        width = 7,
        height = 4.5)
 ```
@@ -351,7 +351,7 @@ ggplot(df_systematicity %>% filter(min_cluster_size == 2), aes(x = dcor, y = p, 
         axis.ticks.y = element_blank(),
         legend.position="bottom")
 
-ggsave(here("figures/sys_p.pdf"),
+ggsave(here("figs/sys_p.pdf"),
        width = 7,
        height = 6)
 ```
@@ -401,7 +401,7 @@ ggplot(all_calculations, aes(x = systematicity, y = comm_score, color = hopkins)
         axis.ticks.y = element_blank(),
         )
 
-ggsave(here("figures/sys_comm_hopkins.pdf"),
+ggsave(here("figs/sys_comm_hopkins.pdf"),
        width = 7,
        height = 4.5)
 ```
@@ -494,7 +494,7 @@ ggplot(tidy_model, aes(x = estimate, y = term, xmin = conf.low, xmax = conf.high
   labs( x = "standardized coefficient estimate",
        y = "predictor")
 
-ggsave(here("figures/coefficients.pdf"),
+ggsave(here("figs/coefficients.pdf"),
        width = 4.5,
        height = 4.5)
 ```
@@ -520,7 +520,7 @@ ggplot(data = stresses, aes(x = components, y = stresses)) +
     theme(axis.ticks.x = element_blank(),
         axis.ticks.y = element_blank())
 
-ggsave(here("figures/mds_scree.pdf"),
+ggsave(here("figs/mds_scree.pdf"),
        width = 6,
        height = 4)
 ```
