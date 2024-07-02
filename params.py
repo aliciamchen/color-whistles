@@ -21,5 +21,5 @@ init_signal_mappings = {0: 0, 6: 1, 18: 2, 23: 3, 32: 4}
 
 
 cluster_params = {
-    "min_cluster_size": [2, 3, 4, 6, 7]
+    "min_cluster_size": [2, 3, 4, 5, 6, 7]
 }

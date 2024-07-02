@@ -50,7 +50,7 @@ def main(args):
         except:
             return np.nan
 
-    df = pd.DataFrame(columns=['game', 'speaker', 'systematicity', 'discreteness', 'learn_score', 'own_score', 'comm_score', 'alignment'])
+    df = pd.DataFrame(columns=['game', 'speaker', 'systematicity', 'hopkins', 'learn_score', 'own_score', 'comm_score', 'alignment'])
 
     for game, pair in game_info.items():
         for participant in pair:

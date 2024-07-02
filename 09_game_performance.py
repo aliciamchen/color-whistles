@@ -16,6 +16,7 @@ def main(args):
 
     with open(os.path.join(args.output_dir, "game_scores.json"), "w") as f:
         json.dump(game_scores, f)
+        print("game scores saved to", os.path.join(args.output_dir, "game_scores.json"))
 
 
 if __name__ == "__main__":
@@ -27,3 +28,4 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    main(args)

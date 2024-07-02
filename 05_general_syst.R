@@ -34,6 +34,7 @@ systs <- matrix(ncol = 3, nrow = 0)
 print("Calculating systematicity...")
 # For each participant, extract their signal distances from big pairwise matrix
 for (id in speaker.ids) {
+  print(id)
 
   signal.indices <- which(signal.labels$V2 %in% id) # change later
   n.signals <- length((signal.indices))
