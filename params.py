@@ -19,7 +19,6 @@ init_color_mappings = {0: 0, 1: 6, 2: 18, 3: 23, 4: 32}
 # init signal mappings with {referent_id: signal_id}
 init_signal_mappings = {0: 0, 6: 1, 18: 2, 23: 3, 32: 4}
 
-
 cluster_params = {
     "min_cluster_size": [2, 3, 4, 5, 6, 7]
 }

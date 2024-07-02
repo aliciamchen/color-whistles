@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.manifold import MDS
 
-
 import params
 
 def mds_stresses(pairwise_dists, max_components):
+    print("Making stress plot.")
     components = []
     stresses = []
     for n_components in range(1, max_components + 1):
@@ -18,12 +18,12 @@ def mds_stresses(pairwise_dists, max_components):
         print(f"Calculating MDS projection for {n_components} components")
         mds = MDS(
             n_components=n_components,
-            eps=params.mds_discreteness["eps"],
+            eps=params.mds["eps"],
             n_jobs=-1,
             dissimilarity="precomputed",
             random_state=params.seed,
-            n_init=params.mds_discreteness["n_init"],
-            max_iter=params.mds_discreteness["max_iter"],
+            n_init=params.mds["n_init"],
+            max_iter=params.mds["max_iter"],
         )
 
         mds.fit(pairwise_dists)
@@ -48,7 +48,6 @@ def main(args):
     # Generate scree plot
     fig, ax = plt.subplots()
     scree_plot(components, stresses, ax)
-    plt.savefig(os.path.join(args.output_dir, "scree_plot.png"))
     plt.show()
 
 

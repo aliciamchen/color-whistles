@@ -19,6 +19,9 @@ python 08_learn_performance.py --learning_sigs outputs/learn_signals_tidy.zip --
 python 09_game_performance.py --comm_file outputs/comm.zip --output_dir outputs
 
 Rscript 10_alignment.R outputs/pairwise_dists.txt outputs/signal_labels.json outputs/metrics
-# python 10_combine_outputs.py --game_info outputs/game_info.json --learn_dists outputs/learn_dists.json --game_scores outputs/game_scores.json --syst outputs/metrics/systematicity.csv --hopkins outputs/metrics/hopkins.csv --btwn_clust_syst outputs/metrics/btwn_clust_syst.csv --within_clust_syst outputs/metrics/within_clust_syst.csv --alignments outputs/metrics/alignments.csv --output_dir outputs
 python 11_combine_outputs.py --output_dir outputs
+
+### Extra stuff
+
+python mds_dims.py --dists_file outputs/pairwise_dists.txt --output_dir outputs
 
