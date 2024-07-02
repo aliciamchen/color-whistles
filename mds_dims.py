@@ -1,4 +1,4 @@
-"""Find best number of MDS components"""
+"""Visualize stress vs. number of MDS dimensions"""
 import json
 import os
 import argparse
@@ -40,7 +40,7 @@ def scree_plot(components, stresses, ax):
 def main(args):
 
     pairwise_dists = np.loadtxt(args.dists_file)
-    components, stresses = mds_stresses(pairwise_dists, max_components=5)
+    components, stresses = mds_stresses(pairwise_dists, max_components=7)
 
     with open(os.path.join(args.output_dir, "stresses.json"), "w") as f:
         json.dump(dict(zip(components, stresses)), f)
