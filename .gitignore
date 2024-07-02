@@ -11,6 +11,7 @@ scratch
 figures
 submissions
 old
+outputs_old
 .RData
 .Rhistory
 .Rproj

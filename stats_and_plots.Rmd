@@ -1,10 +1,9 @@
 ---
-title: "Figures"
+title: "Stats and plots"
 author: "Alicia Chen"
 date: "2024-05-11"
 output:
   pdf_document: default
-  html_notebook: default
 ---
 
 ```{r setup}
@@ -19,12 +18,116 @@ library(car)
 theme_set(theme_classic(base_size = 20))
 ```
 
+# Load data
+
+```{r}
+all_calculations <- read.csv("outputs/all_calculations.csv") %>%
+    mutate(
+    paired_comm_score = (own_score + comm_score) / 2,
+    learn_score_norm = (learn_score - min(learn_score, na.rm = TRUE)) / (max(learn_score, na.rm = TRUE) - min(learn_score, na.rm = TRUE)) ,
+    alignment_norm = (alignment - min(alignment, na.rm = TRUE)) / (max(alignment, na.rm = TRUE) - min(alignment, na.rm = TRUE))
+  )
+
+df_within <- read.csv("outputs/metrics/within_clust_syst.csv") %>% filter(min_cluster_size == 3)
+df_between <- read.csv("outputs/metrics/btwn_clust_syst.csv") %>% filter(min_cluster_size == 3)
+df_systematicity <- read.csv("outputs/metrics/systematicity.csv")
+
+# Merging data for each participant, add comm_score from all_calculations
+df_within <- merge(df_within, all_calculations[, c("speaker", "game", "comm_score")], by = "speaker")
+df_between <- merge(df_between, all_calculations[, c("speaker", "game", "comm_score")], by = "speaker")
+df_systematicity <- merge(df_systematicity, all_calculations[, c("speaker", "game", "comm_score")], by = "speaker")
+df_systematicity <- merge(df_systematicity, df_between[, c("speaker", "n_clusters")], by = "speaker")
+
+# Filter between cluster systematicity to only include participants with more than 1 cluster
+df_between <- df_between[df_between$n_clusters > 1, ]
+```
+
+# How well did participants do during the learning and communication phases? 
+
+Is partner alignment correlated with successful communication?
+
+```{r}
+# correlation between alignment and communication score
+all_calculations %>% distinct(alignment_norm, paired_comm_score) %>%
+  cor.test(~ alignment_norm + paired_comm_score, data = .)
+```
+
+How much is this explained by learning score?
+
+```{r}
+# predicting comm score with partner alignemnt and learning score
+mod <- lm(comm_score ~ 1 + alignment_norm + learn_score, data = all_calculations)
+summary(mod)
+```
+
+
+```{r}
+# Did participants perform above chance overall?
+comm.score.mod.linear <- lmer(score ~ 1 + round + (1 |
+                                                     gameid) + (1 | speakerid),
+                              data = d.comm)
+
+summary(comm.score.mod.linear)
+```
+Is performance above chance?
+
+```{r}
+emm <- emmeans(comm.score.mod.linear, specs = "1")
+summary(emm)
+
+contrast_result <- contrast(emm, method = list("compare to 0.5" = c(1)), offset = -0.5)
+summary(contrast_result)
+```
+
+
 # Embedding figures
+
+## Generate 2d embedding figure
+
+```{r}
+d <- read.csv(here("outputs/embedding_2d.csv"))
+# Make color mapping vector
+col <- unique(d$referent)
+names(col) <- col
+
+f = ggplot(d, aes(x = mds_1, y = mds_2)) +
+  geom_point(
+    aes(color = referent),
+    size = 2.7,
+    alpha = 0.5,
+    stroke = 0
+  ) +
+  geom_point(
+    data = d %>% filter(speaker == 'init'),
+    aes(fill = referent),
+    size = 4,
+    shape = 22,
+    stroke = 1.5
+  ) +
+  scale_color_manual(values = col) +
+  scale_fill_manual(values = col) +
+  theme(legend.position = "none") +
+  coord_fixed()
+
+# +
+#   theme(axis.text.x=element_blank(),
+#         axis.ticks.x=element_blank(),
+#         axis.text.y=element_blank(),
+#         axis.ticks.y=element_blank())
+# lims(x = c(-7, 6), y = c(-5, 5))
+
+f
+
+ggsave(here("figures/mds_all_init.pdf"),
+       f,
+       width = 4,
+       height = 6)
+```
 
 ## Generate 1d embedding figure
 
 ```{r}
-d.1d <- read.csv(here('outputs/embedding_1d.csv')) %>% 
+d.1d <- read.csv(here('outputs/embedding_1d.csv')) %>%
   mutate(game = ifelse(speaker == 'init', 'zzz_init', game))
 
 # Make color mapping vector
@@ -60,7 +163,7 @@ game_order <- data %>%
   group_by(game) %>%
   summarise(avg_comm_score = mean(comm_score, na.rm = TRUE)) %>%
   arrange(desc(avg_comm_score)) %>%
-  mutate(game = if_else(game == "init", "zzz_init", game)) %>%  
+  mutate(game = if_else(game == "init", "zzz_init", game)) %>%
   arrange(desc(avg_comm_score), .by_group = TRUE) %>%
   pull(game)
 
@@ -69,24 +172,24 @@ data$game <- factor(data$game, levels = game_order)
 
 # Plotting
 ggplot(data, aes(x=mds_1, y=position, color=referent)) +
-   geom_point(data = subset(data, game == "zzz_init"), aes(fill = referent), 
+   geom_point(data = subset(data, game == "zzz_init"), aes(fill = referent),
               shape = 22,
               stroke = 1.5,
               size = 7) +
    geom_point(data = subset(data, game != "zzz_init"), aes(color = referent),
-              size = 4, 
+              size = 4,
               stroke = 0,
               alpha = 0.8) +
-   # geom_point(aes(shape = if_else(game == "zzz_init", "square", "circle"), 
-   #               size = if_else(game == "zzz_init", 2, 2), 
-   #               stroke = if_else(game == "zzz_init", 1.5, 0))) + 
+   # geom_point(aes(shape = if_else(game == "zzz_init", "square", "circle"),
+   #               size = if_else(game == "zzz_init", 2, 2),
+   #               stroke = if_else(game == "zzz_init", 1.5, 0))) +
   # scale_shape_manual(values = c("circle" = 19, "square" = 15)) +
   scale_fill_manual(values = col) +
   scale_color_manual(values = col) +
   scale_y_continuous(name="", breaks=NULL, limits = c(-0.2, 0.2)) +  # Remove y-axis labels
   labs(title="1D Embeddings Colored by Referent", x="MDS_1", color="Referent") +
   facet_wrap(~ game, ncol = 1) +
-  theme(legend.position="none", 
+  theme(legend.position="none",
         strip.text = element_blank(),  # Removes the game labels from the facet strips
         strip.background = element_blank())
 
@@ -94,32 +197,12 @@ ggplot(data, aes(x=mds_1, y=position, color=referent)) +
 # ggsave(here("figures/1d_embeddings.pdf"), width = 18, height = 10)
 ```
 
+
+
+
 # Systematicity
 
-```{r}
 
-# Read CSV files
-all_calculations <- read.csv("outputs/all_calculations.csv") %>% 
-    mutate(
-    paired_comm_score = (own_score + comm_score) / 2,
-    learn_score_norm = (learn_score - min(learn_score, na.rm = TRUE)) / (max(learn_score, na.rm = TRUE) - min(learn_score, na.rm = TRUE)) ,
-    alignment_norm = (alignment - min(alignment, na.rm = TRUE)) / (max(alignment, na.rm = TRUE) - min(alignment, na.rm = TRUE))
-  )
-
-df_within <- read.csv("outputs/metrics/within_clust_syst.csv") %>% filter(min_cluster_size == 3)
-df_between <- read.csv("outputs/metrics/btwn_clust_syst.csv") %>% filter(min_cluster_size == 3)
-df_systematicity <- read.csv("outputs/metrics/systematicity.csv")
-
-# Merging data for each participant, add comm_score from all_calculations
-df_within <- merge(df_within, all_calculations[, c("speaker", "game", "comm_score")], by = "speaker")
-df_between <- merge(df_between, all_calculations[, c("speaker", "game", "comm_score")], by = "speaker")
-df_systematicity <- merge(df_systematicity, all_calculations[, c("speaker", "game", "comm_score")], by = "speaker")
-df_systematicity <- merge(df_systematicity, df_between[, c("speaker", "n_clusters")], by = "speaker")
-
-# Filter between cluster systematicity to only include participants with more than 1 cluster
-df_between <- df_between[df_between$n_clusters > 1, ]
-
-```
 
 ```{r}
 
@@ -130,8 +213,8 @@ p <- ggplot(df_systematicity, aes(x = dcor, y = p, color = comm_score)) +
   labs(x = "systematicity", y = "p value", title = "systematicity - p values by communication score") +
   scale_color_viridis_c(option = "plasma", name = "comm score") +
     theme(axis.ticks.x = element_blank(),
-        axis.ticks.y = element_blank(), 
-        legend.position="bottom") 
+        axis.ticks.y = element_blank(),
+        legend.position="bottom")
 
 print(p)
 
@@ -150,10 +233,10 @@ p <- ggplot(df_systematicity, aes(x = dcor, y = comm_score, color = as.factor(n_
   labs(x = "systematicity", y = "communication score", title = "communication score vs systematicity") +
     theme(axis.ticks.x = element_blank(),
         axis.ticks.y = element_blank(),
-        legend.position="bottom") 
+        legend.position="bottom")
 
 print(p)
-# 
+#
 # ggsave(here("figures/sys_comm.pdf"),
 #        width = 7,
 #        height = 6)
@@ -167,7 +250,7 @@ p <- ggplot(all_calculations, aes(x = systematicity, y = comm_score, color = dis
   labs(x = "systematicity", y = "communication score") +
     theme(axis.ticks.x = element_blank(),
         axis.ticks.y = element_blank(),
-        ) 
+        )
 
 print(p)
 
@@ -247,7 +330,7 @@ ggplot(
     theme(axis.ticks.x = element_blank(),
         axis.ticks.y = element_blank()) +
     ylim(0.35, 1)
-# 
+#
 # ggsave(here("figures/alignment.pdf"),
 #        width = 5,
 #        height = 4.5)
@@ -262,7 +345,7 @@ ggplot(
   geom_point(size = 5, alpha = 0.8) +
     scale_color_viridis_c(option = "plasma", name = "communication score") +
     theme(axis.ticks.x = element_blank(),
-        axis.ticks.y = element_blank()) 
+        axis.ticks.y = element_blank())
 
 
 # ggsave(here("figures/learn_align_comm.pdf"),
@@ -272,44 +355,12 @@ ggplot(
 ```
 
 
+# TODO: are between and within cluster syst calculations robust across diff parameteres 
+
 # Stats
 
-Is partner alignment correlated with successful communication? 
 
-```{r}
-# correlation between alignment and communication score
-all_calculations %>% distinct(alignment_norm, paired_comm_score) %>% 
-  cor.test(~ alignment_norm + paired_comm_score, data = .)
-```
-
-How much is this explained by learning score? 
-
-
-```{r}
-# predicting comm score with partner alignemnt and learning score
-mod <- lm(comm_score ~ 1 + alignment_norm + learn_score, data = all_calculations)
-summary(mod)
-```
-
-
-```{r}
-# Did participants perform above chance overall? 
-comm.score.mod.linear <- lmer(score ~ 1 + round + (1 |
-                                                     gameid) + (1 | speakerid),
-                              data = d.comm)
-
-summary(comm.score.mod.linear)
-```
-Is performance above chance?
-
-```{r}
-emm <- emmeans(comm.score.mod.linear, specs = "1")
-summary(emm)
-
-contrast_result <- contrast(emm, method = list("compare to 0.5" = c(1)), offset = -0.5)
-summary(contrast_result)
-```
-Are discreteness and systematicity correlated? 
+Are discreteness and systematicity correlated?
 
 ```{r}
 dis.sys.cor <- cor.test(all_calculations$discreteness, all_calculations$systematicity)
@@ -327,7 +378,7 @@ summary(mod)
 ```
 ```{r}
 # Test whether for participants with 3 or more clusters, systematicity is correlated with between-cluster systematicity
-df_sys_with_between <- merge(df_systematicity, df_between %>% select(c(speaker, dcor)) %>% rename(dcor_between = dcor), by = "speaker") %>% 
+df_sys_with_between <- merge(df_systematicity, df_between %>% select(c(speaker, dcor)) %>% rename(dcor_between = dcor), by = "speaker") %>%
   filter(n_clusters >= 3)
 
 ggplot(df_sys_with_between, aes(x = dcor, y = dcor_between)) +
@@ -336,7 +387,7 @@ ggplot(df_sys_with_between, aes(x = dcor, y = dcor_between)) +
   labs(x = "systematicity", y = "between-cluster systematicity", title = "Systematicity vs. Between-cluster Systematicity") +
   theme(axis.ticks.x = element_blank(),
         axis.ticks.y = element_blank())
-# 
+#
 
 # Calculate correlation between systematicity and between-cluster systematicity
 cor.test(df_sys_with_between$dcor, df_sys_with_between$dcor_between)
@@ -352,7 +403,7 @@ ggplot(all_calculations, aes(x = systematicity, y = discreteness, color = comm_s
   geom_smooth(method = "lm", se = T, color = "black") +
   labs(y = "hopkins stat") +
   theme(axis.ticks.x = element_blank(),
-        axis.ticks.y = element_blank(), 
+        axis.ticks.y = element_blank(),
         legend.position = "bottom")
 
 # ggsave(here("figures/sys_dis.pdf"),
@@ -433,7 +484,7 @@ Count the number of participants that had 5 clusters
 df_systematicity %>% filter(n_clusters == 5) %>% nrow()
 ```
 
-Are both of these discreteness metrics correlated with communication score? 
+Are both of these discreteness metrics correlated with communication score?
 
 ```{r}
 cor.test(all_calculations$discreteness, all_calculations$comm_score)
@@ -442,19 +493,19 @@ cor.test(all_calculations$discreteness, all_calculations$comm_score)
 ```{r}
 cor.test(all_calculations$n_clusters, all_calculations$comm_score)
 ```
-Is systematicity correlated with communication score? 
+Is systematicity correlated with communication score?
 
 ```{r}
 cor.test(all_calculations$systematicity, all_calculations$comm_score)
 ```
 
-How many participants had statistically significant amounts of between-cluster systematicity? 
+How many participants had statistically significant amounts of between-cluster systematicity?
 
 ```{r}
 df_between %>% filter(p < 0.05) %>% nrow()
 ```
 
-How many clusters had statistically significant amounts of within-cluster systematicity? 
+How many clusters had statistically significant amounts of within-cluster systematicity?
 
 ```{r}
 df_within %>% nrow()
@@ -462,12 +513,12 @@ df_within %>% filter(p < 0.05, n_signals < 40) %>% nrow()
 ```
 
 ```{r}
-# Group by participants, check how many clusters per participant had significant within-cluster systematicity 
+# Group by participants, check how many clusters per participant had significant within-cluster systematicity
 df_within %>% group_by(speaker) %>% filter(p < 0.05) %>% summarise(n_clusters = n())
 
 ```
 
-Is between cluster systematicity correlated with general systematicity? With communication score? 
+Is between cluster systematicity correlated with general systematicity? With communication score?
 
 ```{r}
 cor.test(df_sys_with_between$dcor, df_sys_with_between$dcor_between)
@@ -483,27 +534,27 @@ cor.test(df_sys_with_between$comm_score, df_sys_with_between$dcor_between)
 
 ## Regression
 
-Scale all predictors 
+Scale all predictors
 
 ```{r}
-all_calculations_scaled <- all_calculations %>% 
-  mutate(across(!c(game, speaker), ~ scale(.) %>% as.vector())) %>% 
+all_calculations_scaled <- all_calculations %>%
+  mutate(across(!c(game, speaker), ~ scale(.) %>% as.vector())) %>%
   rename(hopkins_stat = discreteness)
 
 ```
 
 
 ```{r}
-# Linear model predicting comm score from all predictors 
+# Linear model predicting comm score from all predictors
 mod <- lm(comm_score ~ learn_score + alignment + systematicity + hopkins_stat + n_clusters, data = all_calculations_scaled)
 summary(mod)
 ```
 ```{r}
 # Plot coefficients
 library(coefplot)
-coefplot(mod, 
-         intercept = F, 
-         innerCI = 0, 
+coefplot(mod,
+         intercept = F,
+         innerCI = 0,
          lwdOuter = 1)
 
 ```
@@ -516,7 +567,7 @@ ggplot(tidy_model, aes(x = estimate, y = term, xmin = conf.low, xmax = conf.high
   geom_pointrange(fatten = 5) +
   geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
   labs( x = "standardized coefficient estimate",
-       y = "predictor") 
+       y = "predictor")
 
 # ggsave(here("figures/coefficients.pdf"),
 #        width = 4.5,
@@ -564,10 +615,10 @@ Stress plot with MDS dimensions
 ```{r}
 library(jsonlite)
 # load json file of stresses
-stresses <- read_json(here("test/stresses.json")) %>% 
-  as.data.frame() %>% 
+stresses <- read_json(here("test/stresses.json")) %>%
+  as.data.frame() %>%
   setNames(1:5) %>%
-  pivot_longer(cols = everything(), names_to = "components", values_to = "stresses") %>% 
+  pivot_longer(cols = everything(), names_to = "components", values_to = "stresses") %>%
   mutate(components = as.numeric(components))
 ```
 

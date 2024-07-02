@@ -8,10 +8,10 @@ python 01_process_signals.py --learn_file outputs_color_sounds/learn.zip --comm_
 python 02_pairwise_dists.py --init_signals outputs_color_sounds/init_signals_tidy.zip --comm_signals outputs_color_sounds/comm_signals_tidy.zip --output_dir outputs_color_sounds
 python 03_embeddings.py --dists_file outputs_color_sounds/pairwise_dists.txt --labels_file outputs_color_sounds/signal_labels.json --output_dir outputs_color_sounds
 
-# mkdir -p outputs/metrics
+mkdir -p outputs_color_sounds/metrics
 
 # python 04_cluster.py --dists_file outputs/pairwise_dists.txt --labels_file outputs/signal_labels.json --output_dir outputs
-# Rscript 05_general_syst.R outputs/pairwise_dists.txt outputs/signal_labels.json outputs/metrics
+Rscript 05_general_syst.R outputs_color_sounds/pairwise_dists.txt outputs_color_sounds/signal_labels.json outputs_color_sounds/metrics
 # Rscript 06_cluster_syst.R outputs/pairwise_dists.txt outputs/signal_labels.json outputs/metrics
 
 # Rscript 07_hopkins.R outputs/embedding_3d.csv outputs/metrics
