@@ -14,10 +14,11 @@ GAME_PERFORMANCE_SCRIPT = 09_game_performance.py
 ALIGNMENT_SCRIPT = 10_alignment.R
 COMBINE_OUTPUTS_SCRIPT = 11_combine_outputs.py
 MDS_SCRIPT = mds_dims.py
-OUTPUT_DIR = outputs_test
+OUTPUT_DIR = outputs
+METRICS_DIR = $(OUTPUT_DIR)/metrics
 
 # Phony targets
-.PHONY: all fetch process pairwise embeddings cluster metrics performance combine mds
+.PHONY: all fetch process pairwise embeddings cluster metrics performance combine mds clean
 
 # Main target
 all: fetch process pairwise embeddings cluster metrics performance combine mds
@@ -87,3 +88,8 @@ mds: $(OUTPUT_DIR)/stresses.json
 
 $(OUTPUT_DIR)/stresses.json: $(OUTPUT_DIR)/pairwise_dists.txt $(MDS_SCRIPT)
 	$(PYTHON) $(MDS_SCRIPT) --dists_file $(OUTPUT_DIR)/pairwise_dists.txt --output_dir $(OUTPUT_DIR)
+
+# Clean up
+clean:
+	find $(OUTPUT_DIR) -type f -not -path "$(METRICS_DIR)/*" -delete
+	find $(METRICS_DIR) -type f -delete
