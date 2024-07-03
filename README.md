@@ -4,17 +4,6 @@
 
 `pip install -e .`
 
-## Files
-
-### Data
-
-Raw data is in `raw_data`. See [codebook](/raw_data/README.md).
-
-Processed data is in `outputs`. See [codebook](/outputs/README.md).
-
-
-### Analysis pipeline
-
 First, make sure you have the necessary packages.
 
 For python, create the virtual environment:
@@ -26,9 +15,19 @@ conda activate color-sounds
 
 For R, open the project in RStudio and run `renv::restore()`.
 
+### Analysis pipeline
+
 Second, run `run_analysis.sh`. NOTE: this takes a couple hours because of `02_pairwise_dists.py`, which computes the pairwise distances between all combinations of the 1989 signals across all participants.
 
 Finally, run `stats_and_plots.Rmd` to generate the plots and results of the analyses reported in the paper.
+
+## Files
+
+### Data
+
+Raw data is in `raw_data`. See [codebook](/raw_data/README.md).
+
+Processed data is in `outputs`. See [codebook](/outputs/README.md).
 
 ### Other files
 
