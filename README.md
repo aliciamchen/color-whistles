@@ -17,11 +17,22 @@ For R, open the project in RStudio and run `renv::restore()`.
 
 ### Analysis pipeline
 
-Second, run `run_analysis.sh`. NOTE: this takes a couple hours because of `02_pairwise_dists.py`, which computes the pairwise distances between all combinations of the 1989 signals across all participants.
+To reproduce all calculations:
+
+```{bash}
+make clean
+make
+```
+
+NOTE: this takes a couple hours because of `02_pairwise_dists.py`, which computes the pairwise distances between all combinations of the 1989 signals across all participants.
 
 Finally, run `stats_and_plots.Rmd` to generate the plots and results of the analyses reported in the paper.
 
 ## Files
+
+### Tools
+
+[TODO]
 
 ### Data
 
