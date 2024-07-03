@@ -505,9 +505,9 @@ ggsave(here("figs/coefficients.pdf"),
 Stress plot with MDS dimensions
 
 ```{r}
-stresses <- read_json(here("test/stresses.json")) %>%
+stresses <- read_json(here("outputs/stresses.json")) %>%
   as.data.frame() %>%
-  setNames(1:5) %>%
+  setNames(1:7) %>%
   pivot_longer(cols = everything(), names_to = "components", values_to = "stresses") %>%
   mutate(components = as.numeric(components))
 ```
@@ -516,12 +516,13 @@ stresses <- read_json(here("test/stresses.json")) %>%
 ggplot(data = stresses, aes(x = components, y = stresses)) +
   geom_point() +
   geom_line() +
+  scale_x_continuous(breaks = 1:7) +
   labs(x = "components", y = "stress") +
     theme(axis.ticks.x = element_blank(),
         axis.ticks.y = element_blank())
 
 ggsave(here("figs/mds_scree.pdf"),
-       width = 6,
+       width = 7,
        height = 4)
 ```
 
