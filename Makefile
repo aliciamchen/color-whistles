@@ -1,67 +1,89 @@
-outputs/learn.zip: raw_data/learning_data.zip 00_fetch_games.py
-	python 00_fetch_games.py --learn_raw raw_data/learning_data.zip --comm_raw raw_data/communication_game_data.zip --output_dir outputs
+# Variables
+PYTHON = python
+RSCRIPT = Rscript
+FETCH_SCRIPT = 00_fetch_games.py
+PROCESS_SCRIPT = 01_process_signals.py
+PAIRWISE_SCRIPT = 02_pairwise_dists.py
+EMBEDDINGS_SCRIPT = 03_embeddings.py
+CLUSTER_SCRIPT = 04_cluster.py
+GENERAL_SYST_SCRIPT = 05_general_syst.R
+CLUSTER_SYST_SCRIPT = 06_cluster_syst.R
+HOPKINS_SCRIPT = 07_hopkins.R
+LEARN_PERFORMANCE_SCRIPT = 08_learn_performance.py
+GAME_PERFORMANCE_SCRIPT = 09_game_performance.py
+ALIGNMENT_SCRIPT = 10_alignment.R
+COMBINE_OUTPUTS_SCRIPT = 11_combine_outputs.py
+MDS_SCRIPT = mds_dims.py
+OUTPUT_DIR = outputs_test
 
-outputs/comm.zip: raw_data/communication_game_data.zip 00_fetch_games.py
-	python 00_fetch_games.py --learn_raw raw_data/learning_data.zip --comm_raw raw_data/communication_game_data.zip --output_dir outputs
+# Phony targets
+.PHONY: all fetch process pairwise embeddings cluster metrics performance combine mds
 
-outputs/game_info.json: raw_data/communication_game_data.zip 00_fetch_games.py
-	python 00_fetch_games.py --learn_raw raw_data/learning_data.zip --comm_raw raw_data/communication_game_data.zip --output_dir outputs
+# Main target
+all: fetch process pairwise embeddings cluster metrics performance combine mds
 
+# Fetching data
+fetch: $(OUTPUT_DIR)/learn.zip $(OUTPUT_DIR)/comm.zip $(OUTPUT_DIR)/game_info.json
 
-outputs/init_signals_tidy.zip: stim/learning_signals.json 01_process_signals.py
-	python 01_process_signals.py --learn_file outputs/learn.zip --comm_file outputs/comm.zip --output_dir outputs
+$(OUTPUT_DIR)/learn.zip $(OUTPUT_DIR)/comm.zip $(OUTPUT_DIR)/game_info.json: raw_data/learning_data.zip raw_data/communication_game_data.zip $(FETCH_SCRIPT)
+	$(PYTHON) $(FETCH_SCRIPT) --learn_raw raw_data/learning_data.zip --comm_raw raw_data/communication_game_data.zip --output_dir $(OUTPUT_DIR)
 
-outputs/learn_signals_tidy.zip: outputs/learn.zip 01_process_signals.py
-	python 01_process_signals.py --learn_file outputs/learn.zip --comm_file outputs/comm.zip --output_dir outputs
+# Processing signals
+process: $(OUTPUT_DIR)/init_signals_tidy.zip $(OUTPUT_DIR)/learn_signals_tidy.zip $(OUTPUT_DIR)/comm_signals_tidy.zip
 
-outputs/comm_signals_tidy.zip: outputs/comm.zip 01_process_signals.py
-	python 01_process_signals.py --learn_file outputs/learn.zip --comm_file outputs/comm.zip --output_dir outputs
+$(OUTPUT_DIR)/init_signals_tidy.zip $(OUTPUT_DIR)/learn_signals_tidy.zip $(OUTPUT_DIR)/comm_signals_tidy.zip: $(OUTPUT_DIR)/learn.zip $(OUTPUT_DIR)/comm.zip $(PROCESS_SCRIPT)
+	$(PYTHON) $(PROCESS_SCRIPT) --learn_file $(OUTPUT_DIR)/learn.zip --comm_file $(OUTPUT_DIR)/comm.zip --output_dir $(OUTPUT_DIR)
 
+# Calculating pairwise distances
+pairwise: $(OUTPUT_DIR)/pairwise_dists.txt $(OUTPUT_DIR)/signal_labels.json
 
-outputs/pairwise_dists.txt: outputs/init_signals_tidy.zip outputs/comm_signals_tidy.zip 02_pairwise_dists.py
-	python 02_pairwise_dists.py --learn_file outputs/learn.zip --comm_file outputs/comm.zip --output_dir outputs
+$(OUTPUT_DIR)/pairwise_dists.txt $(OUTPUT_DIR)/signal_labels.json: $(OUTPUT_DIR)/init_signals_tidy.zip $(OUTPUT_DIR)/comm_signals_tidy.zip $(PAIRWISE_SCRIPT)
+	$(PYTHON) $(PAIRWISE_SCRIPT) --learn_file $(OUTPUT_DIR)/learn.zip --comm_file $(OUTPUT_DIR)/comm.zip --output_dir $(OUTPUT_DIR)
 
-outputs/signal_labels.json: outputs/init_signals_tidy.zip outputs/comm_signals_tidy.zip 02_pairwise_dists.py
-	python 02_pairwise_dists.py --learn_file outputs/learn.zip --comm_file outputs/comm.zip --output_dir outputs
+# Generating embeddings
+embeddings: $(OUTPUT_DIR)/embedding_1d.csv $(OUTPUT_DIR)/embedding_2d.csv $(OUTPUT_DIR)/embedding_3d.csv
 
+$(OUTPUT_DIR)/embedding_1d.csv $(OUTPUT_DIR)/embedding_2d.csv $(OUTPUT_DIR)/embedding_3d.csv: $(OUTPUT_DIR)/pairwise_dists.txt $(OUTPUT_DIR)/signal_labels.json $(EMBEDDINGS_SCRIPT)
+	$(PYTHON) $(EMBEDDINGS_SCRIPT) --dists_file $(OUTPUT_DIR)/pairwise_dists.txt --labels_file $(OUTPUT_DIR)/signal_labels.json --output_dir $(OUTPUT_DIR)
 
-outputs/embedding_1d.csv: outputs/pairwise_dists.txt outputs/signal_labels.json 03_embeddings.py
-	python 03_embeddings.py --dists_file outputs/pairwise_dists.txt --labels_file outputs/signal_labels.json --output_dir outputs
+# Clustering
+cluster: $(OUTPUT_DIR)/cluster_output.csv
 
-outputs/embedding_2d.csv: outputs/pairwise_dists.txt outputs/signal_labels.json 03_embeddings.py
-	python 03_embeddings.py --dists_file outputs/pairwise_dists.txt --labels_file outputs/signal_labels.json --output_dir outputs
+$(OUTPUT_DIR)/cluster_output.csv: $(OUTPUT_DIR)/pairwise_dists.txt $(OUTPUT_DIR)/signal_labels.json $(CLUSTER_SCRIPT)
+	$(PYTHON) $(CLUSTER_SCRIPT) --dists_file $(OUTPUT_DIR)/pairwise_dists.txt --labels_file $(OUTPUT_DIR)/signal_labels.json --output_dir $(OUTPUT_DIR)
 
-outputs/embedding_3d.csv: outputs/pairwise_dists.txt outputs/signal_labels.json 03_embeddings.py
-	python 03_embeddings.py --dists_file outputs/pairwise_dists.txt --labels_file outputs/signal_labels.json --output_dir outputs
+# Metrics calculations
+metrics: $(OUTPUT_DIR)/metrics/systematicity.csv $(OUTPUT_DIR)/metrics/btwn_clust_syst.csv $(OUTPUT_DIR)/metrics/within_clust_syst.csv $(OUTPUT_DIR)/metrics/hopkins.csv $(OUTPUT_DIR)/metrics/alignments.csv
 
+$(OUTPUT_DIR)/metrics/systematicity.csv: $(OUTPUT_DIR)/pairwise_dists.txt $(OUTPUT_DIR)/signal_labels.json $(GENERAL_SYST_SCRIPT)
+	$(RSCRIPT) $(GENERAL_SYST_SCRIPT) $(OUTPUT_DIR)/pairwise_dists.txt $(OUTPUT_DIR)/signal_labels.json $(OUTPUT_DIR)/metrics
 
-outputs/cluster_output.csv: outputs/pairwise_dists.txt outputs/signal_labels.json 04_cluster.py
-	python 04_cluster.py --dists_file outputs/pairwise_dists.txt --labels_file outputs/signal_labels.json --output_dir outputs
+$(OUTPUT_DIR)/metrics/btwn_clust_syst.csv $(OUTPUT_DIR)/metrics/within_clust_syst.csv: $(OUTPUT_DIR)/pairwise_dists.txt $(OUTPUT_DIR)/signal_labels.json $(CLUSTER_SYST_SCRIPT)
+	$(RSCRIPT) $(CLUSTER_SYST_SCRIPT) $(OUTPUT_DIR)/pairwise_dists.txt $(OUTPUT_DIR)/signal_labels.json $(OUTPUT_DIR)/metrics
 
+$(OUTPUT_DIR)/metrics/hopkins.csv: $(OUTPUT_DIR)/embedding_3d.csv $(HOPKINS_SCRIPT)
+	$(RSCRIPT) $(HOPKINS_SCRIPT) $(OUTPUT_DIR)/embedding_3d.csv $(OUTPUT_DIR)/metrics
 
-outputs/metrics/systematicity.csv: outputs/pairwise_dists.txt outputs/signal_labels.json 05_general_syst.R
-	Rscript 05_general_syst.R outputs/pairwise_dists.txt outputs/signal_labels.json outputs/metrics
+$(OUTPUT_DIR)/metrics/alignments.csv: $(OUTPUT_DIR)/pairwise_dists.txt $(OUTPUT_DIR)/signal_labels.json $(ALIGNMENT_SCRIPT)
+	$(RSCRIPT) $(ALIGNMENT_SCRIPT) $(OUTPUT_DIR)/pairwise_dists.txt $(OUTPUT_DIR)/signal_labels.json $(OUTPUT_DIR)/metrics
 
-outputs/metrics/btwn_clust_syst.csv: outputs/pairwise_dists.txt outputs/signal_labels.json 06_cluster_syst.R
-	Rscript 06_cluster_syst.R outputs/pairwise_dists.txt outputs/signal_labels.json outputs/metrics
+# Performance calculations
+performance: $(OUTPUT_DIR)/learn_dists.json $(OUTPUT_DIR)/game_scores.json
 
-outputs/metrics/within_clust_syst.csv:outputs/pairwise_dists.txt outputs/signal_labels.json 06_cluster_syst.R
-	Rscript 06_cluster_syst.R outputs/pairwise_dists.txt outputs/signal_labels.json outputs/metrics
+$(OUTPUT_DIR)/learn_dists.json: $(OUTPUT_DIR)/learn_signals_tidy.zip $(OUTPUT_DIR)/init_signals_tidy.zip $(LEARN_PERFORMANCE_SCRIPT)
+	$(PYTHON) $(LEARN_PERFORMANCE_SCRIPT) --learning_sigs $(OUTPUT_DIR)/learn_signals_tidy.zip --init_sigs $(OUTPUT_DIR)/init_signals_tidy.zip --output_dir $(OUTPUT_DIR)
 
-outputs/metrics/hopkins.csv: outputs/embedding_3d.csv 07_hopkins.R
-	Rscript 07_hopkins.R outputs/embedding_3d.csv outputs/metrics
+$(OUTPUT_DIR)/game_scores.json: $(OUTPUT_DIR)/comm.zip $(GAME_PERFORMANCE_SCRIPT)
+	$(PYTHON) $(GAME_PERFORMANCE_SCRIPT) --comm_file $(OUTPUT_DIR)/comm.zip --output_dir $(OUTPUT_DIR)
 
-outputs/learn_dists.json: outputs/learn_signals_tidy.zip outputs/init_signals_tidy.zip 08_learn_performance.py
-	python 08_learn_performance.py --learning_sigs outputs/learn_signals_tidy.zip --init_sigs outputs/init_signals_tidy.zip --output_dir outputs
+# Combining outputs
+combine: $(OUTPUT_DIR)/all_calculations.csv
 
-outputs/game_scores.json: outputs/comm.zip 09_game_performance.py
-	python 09_game_performance.py --comm_file outputs/comm.zip --output_dir outputs
+$(OUTPUT_DIR)/all_calculations.csv: $(OUTPUT_DIR)/game_info.json $(OUTPUT_DIR)/learn_dists.json $(OUTPUT_DIR)/game_scores.json $(OUTPUT_DIR)/metrics/systematicity.csv $(OUTPUT_DIR)/metrics/btwn_clust_syst.csv $(OUTPUT_DIR)/metrics/within_clust_syst.csv $(OUTPUT_DIR)/metrics/hopkins.csv $(OUTPUT_DIR)/metrics/alignments.csv $(COMBINE_OUTPUTS_SCRIPT)
+	$(PYTHON) $(COMBINE_OUTPUTS_SCRIPT) --output_dir $(OUTPUT_DIR)
 
-outputs/metrics/alignments.csv: outputs/pairwise_dists.txt outputs/signal_labels.json 10_alignment.R
-	Rscript 10_alignment.R outputs/pairwise_dists.txt outputs/signal_labels.json outputs/metrics
+# MDS calculation
+mds: $(OUTPUT_DIR)/stresses.json
 
-outputs/all_calculations.csv: outputs/game_info.json outputs/learn_dists.json outputs/game_scores.json outputs/metrics/systematicity.csv outputs/metrics/btwn_clust_syst.csv outputs/metrics/within_clust_syst.csv outputs/metrics/hopkins.csv outputs/metrics/alignments.csv 11_combine_outputs.py
-	python 11_combine_outputs.py --output_dir outputs
-
-outputs/stresses.json: outputs/pairwise_dists.txt mds_dims.py
-	python mds_dims.py --dists_file outputs/pairwise_dists.txt --output_dir outputs
+$(OUTPUT_DIR)/stresses.json: $(OUTPUT_DIR)/pairwise_dists.txt $(MDS_SCRIPT)
+	$(PYTHON) $(MDS_SCRIPT) --dists_file $(OUTPUT_DIR)/pairwise_dists.txt --output_dir $(OUTPUT_DIR)
