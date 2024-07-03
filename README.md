@@ -2,15 +2,14 @@
 
 ## Setup
 
-`pip install -e .`
-
 First, make sure you have the necessary packages.
 
-For python, create the virtual environment:
+For python:
 
 ```{bash}
 conda env create -f environment.yml
 conda activate color-sounds
+pip install -e .
 ```
 
 For R, open the project in RStudio and run `renv::restore()`.
@@ -24,7 +23,7 @@ make clean
 make
 ```
 
-NOTE: this takes a couple hours because of `02_pairwise_dists.py`, which computes the pairwise distances between all combinations of the 1989 signals across all participants.
+NOTE: this takes multiple hours. The scripts that take a long time are `02_pairwise_dists.py`, which computes the pairwise distances between all combinations of the 1989 signals across all participants, `mds_dims.py` which calculates embeddings for 1 to 7 dimensions.
 
 Finally, run `stats_and_plots.Rmd` to generate the plots and results of the analyses reported in the paper.
 
@@ -32,7 +31,7 @@ Finally, run `stats_and_plots.Rmd` to generate the plots and results of the anal
 
 ### Tools
 
-[TODO]
+Contains helper functions for analyses.
 
 ### Data
 
