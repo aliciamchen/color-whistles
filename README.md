@@ -27,11 +27,13 @@ NOTE: this takes multiple hours. The scripts that take a long time are `02_pairw
 
 Finally, run `stats_and_plots.Rmd` to generate the plots and results of the analyses reported in the paper.
 
-## Files
+## Other files
 
 ### Tools
 
-Contains helper functions for analyses.
+Contains helper functions for analyses. Not all of these are used.
+
+TODO: clean up
 
 ### Data
 
@@ -39,12 +41,15 @@ Raw data is in `raw_data`. See [codebook](/raw_data/README.md).
 
 Processed data is in `outputs`. See [codebook](/outputs/README.md).
 
-### Other files
+### Figures
+
+The figure outputs of `stats_and_plots.Rmd` are saved in `figs`. For the Illustrator-edited figures in the paper, see `0_figs_combined.pdf`.
+
+### Other
 
 - `extra/plot_embeddings.R`: Plots 2D MDS embeddings for each game. Creates one plot (faceted by participant) per game. The colors of the points correspond to the referent, and the shapes correspond to cluster membership. Communication score, Hopkins statistic, systematicity, and partner alignment are displayed on each facet.
     - This file also contains code to filter and search example yellow signals that have migrated, for visualizing in the paper.
 - `plot_signals.py`: Generates `.svg` plots for learning and example communication signals.
-- `mds_dims.py`: Visualizes stress vs. number of MDS dimensions. This also takes a while to run
 
 ## R session info
 
