@@ -1,6 +1,6 @@
 """Stuff to put in here:
 whistles sampling frequency
-input output filenames
+input output filenames?
 """
 
 sampling_freq = 50

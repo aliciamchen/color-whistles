@@ -3,8 +3,9 @@
 .ipynb_checkpoints
 __pycache__
 figs.ipynb
-.ipynb
+*.ipynb
 .Rproj.user
+*.egg-info
 test_output
 data_old
 scratch
