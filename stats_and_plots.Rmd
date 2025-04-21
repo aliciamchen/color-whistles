@@ -75,6 +75,10 @@ ggplot(all_calculations, aes(x = learn_score_norm, y = comm_score)) +
   theme(axis.ticks.x = element_blank(),
         axis.ticks.y = element_blank()) +
   ylim(0.35, 1)
+
+ggsave(here("figs/learn_comm.pdf"),
+       width = 5,
+       height = 4.5)
 ```
 
 ```{r}
@@ -331,6 +335,12 @@ Count the number of participants that had 5 clusters
 
 ```{r}
 df_systematicity %>% filter(min_cluster_size == 2, n_clusters == 5) %>% nrow()
+```
+
+Correlation between both discreteness measures
+
+```{r}
+cor.test(all_calculations$hopkins, all_calculations$n_clusters)
 ```
 
 ### Systematicity
