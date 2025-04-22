@@ -52,6 +52,10 @@ for speaker, referent in speaker_referent_pairs:
 
 def plot_game_signals(df):
     """Create a grid of signals for each game, with rows as colors and columns as players."""
+    # Load game scores
+    with open("outputs/game_scores.json") as f:
+        game_scores = json.load(f)
+    
     # Group by game id to process one game at a time
     games = df['gameid'].unique()
     
@@ -59,20 +63,34 @@ def plot_game_signals(df):
         print(f"Processing game {game}...")
         game_df = df[df['gameid'] == game]
         
-        # Get unique players and colors in this game
         players = game_df['speakerid'].unique()
-        colors = game_df['correct'].unique()
+        color_data = game_df[['correct', 'correctid']].drop_duplicates()
         
-        # Create a figure with subplots - rows for colors, columns for players
+        # Sort colors by correctid
+        color_data = color_data.sort_values('correctid')
+        colors = color_data['correct'].tolist()
+
         fig, axes = plt.subplots(
             nrows=len(colors), 
             ncols=len(players), 
             figsize=(len(players) * 4, len(colors) * 1.5),
-            constrained_layout=True
+            constrained_layout=True,
+            sharex='col', 
+            sharey='row'  
         )
         
-        # Set title for the entire figure
-        fig.suptitle(f"Game: {game}", fontsize=16)
+        # Get average game score
+        player1_score = game_scores.get(players[0], "N/A")
+        player2_score = game_scores.get(players[1], "N/A")
+        if isinstance(player1_score, (int, float)) and isinstance(player2_score, (int, float)):
+            game_score = (player1_score + player2_score) / 2
+        else:
+            game_score = "N/A"
+        
+        score_str = f"Score: {game_score:.3f}" if isinstance(game_score, (int, float)) else f"Score: {game_score}"
+        
+        # Set title for the entire figure with game score
+        fig.suptitle(f"Game: {game} {score_str}", fontsize=16)
         
         # If there's only one color or player, make sure axes is 2D
         if len(colors) == 1:
@@ -85,21 +103,22 @@ def plot_game_signals(df):
             axes[0, j].set_title(f"Player: {player[:6]}...", fontsize=10)
         
         # Create a separate axis for color boxes
-        box_width = 0.5  # Width of the color box
+        box_width = 0.5  
+        box_height = 0.8
         
         # Add colored boxes for row labels
         for i, color in enumerate(colors):
             # Add small colored rectangle to the left of each row
             color_box = plt.Rectangle(
-                (-box_width*3, 0), 
+                (-box_width*1.2, 0), 
                 box_width, 
-                box_width, 
+                box_height, 
                 facecolor=color, 
-                edgecolor='black',
                 transform=axes[i, 0].transAxes,
                 clip_on=False
             )
             axes[i, 0].add_patch(color_box)
+            
             
         # Fill in each subplot with the corresponding signal
         for i, color in enumerate(colors):
@@ -111,7 +130,8 @@ def plot_game_signals(df):
                     signal = process_whistles.interpolate_signal(raw_signal)
                     
                     # Plot signal
-                    process_whistles.plot_signal(signal, lw=2, ax=ax)
+                    process_whistles.plot_signal(signal, lw=4, ax=ax)
+                    
                     ax.set_xticks([])
                     ax.set_yticks([])
                 except Exception as e:
@@ -120,16 +140,11 @@ def plot_game_signals(df):
                     ax.set_xticks([])
                     ax.set_yticks([])
         
-        # Add more whitespace to the left for the color boxes
-        plt.subplots_adjust(left=0.1)
-        
         # Save the figure
         plt.savefig(f"figs/game_signals_{game}.svg", bbox_inches='tight')
-        plt.savefig(f"figs/game_signals_{game}.png", bbox_inches='tight', dpi=150)
         plt.close()
 
 # %% 
 # Create game-level charts
 plot_game_signals(df)
 
-# %%
