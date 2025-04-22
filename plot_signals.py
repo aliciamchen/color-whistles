@@ -1,3 +1,4 @@
+# %%
 import numpy as np
 import pandas as pd
 import json
@@ -41,6 +42,94 @@ for speaker, referent in speaker_referent_pairs:
     raw_signal = fetch_json_signal(df, speaker, referent)
     signal = process_whistles.interpolate_signal(raw_signal)
     f, ax = plt.subplots(figsize=(10, 5))
-    process_whistles.plot_signal(signal, lw=4, ax=ax)
+    process_whistles.plot_signal(signal, lw=10, ax=ax)
     plt.axis('off')
     plt.savefig(f"figs/comm_signal_{speaker}_{referent}.svg")
+
+
+
+# %% Plot game-level signals with player/color grid
+
+def plot_game_signals(df):
+    """Create a grid of signals for each game, with rows as colors and columns as players."""
+    # Group by game id to process one game at a time
+    games = df['gameid'].unique()
+    
+    for game in games:
+        print(f"Processing game {game}...")
+        game_df = df[df['gameid'] == game]
+        
+        # Get unique players and colors in this game
+        players = game_df['speakerid'].unique()
+        colors = game_df['correct'].unique()
+        
+        # Create a figure with subplots - rows for colors, columns for players
+        fig, axes = plt.subplots(
+            nrows=len(colors), 
+            ncols=len(players), 
+            figsize=(len(players) * 4, len(colors) * 1.5),
+            constrained_layout=True
+        )
+        
+        # Set title for the entire figure
+        fig.suptitle(f"Game: {game}", fontsize=16)
+        
+        # If there's only one color or player, make sure axes is 2D
+        if len(colors) == 1:
+            axes = axes.reshape(1, -1)
+        if len(players) == 1:
+            axes = axes.reshape(-1, 1)
+            
+        # Add column headers (player IDs)
+        for j, player in enumerate(players):
+            axes[0, j].set_title(f"Player: {player[:6]}...", fontsize=10)
+        
+        # Create a separate axis for color boxes
+        box_width = 0.5  # Width of the color box
+        
+        # Add colored boxes for row labels
+        for i, color in enumerate(colors):
+            # Add small colored rectangle to the left of each row
+            color_box = plt.Rectangle(
+                (-box_width*3, 0), 
+                box_width, 
+                box_width, 
+                facecolor=color, 
+                edgecolor='black',
+                transform=axes[i, 0].transAxes,
+                clip_on=False
+            )
+            axes[i, 0].add_patch(color_box)
+            
+        # Fill in each subplot with the corresponding signal
+        for i, color in enumerate(colors):
+            for j, player in enumerate(players):
+                ax = axes[i, j]
+                try:
+                    # Get signal for this player and color
+                    raw_signal = fetch_json_signal(game_df, player, color)
+                    signal = process_whistles.interpolate_signal(raw_signal)
+                    
+                    # Plot signal
+                    process_whistles.plot_signal(signal, lw=2, ax=ax)
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+                except Exception as e:
+                    # Handle case where player didn't produce a signal for this color
+                    ax.text(0.5, 0.5, "No signal", ha='center', va='center')
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+        
+        # Add more whitespace to the left for the color boxes
+        plt.subplots_adjust(left=0.1)
+        
+        # Save the figure
+        plt.savefig(f"figs/game_signals_{game}.svg", bbox_inches='tight')
+        plt.savefig(f"figs/game_signals_{game}.png", bbox_inches='tight', dpi=150)
+        plt.close()
+
+# %% 
+# Create game-level charts
+plot_game_signals(df)
+
+# %%
